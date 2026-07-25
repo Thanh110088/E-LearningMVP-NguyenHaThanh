@@ -43,9 +43,14 @@ class CatalogRepository {
     };
   }
 
-  async findExamById(id) {
-    return prisma.exam.findUnique({
-      where: { id },
+  async findExamById(idOrCode) {
+    return prisma.exam.findFirst({
+      where: {
+        OR: [
+          { id: idOrCode },
+          { code: idOrCode },
+        ],
+      },
       include: {
         subject: { select: { id: true, name: true, code: true } },
         grade: { select: { id: true, name: true, code: true } },

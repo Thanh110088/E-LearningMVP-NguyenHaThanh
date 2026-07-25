@@ -8,10 +8,17 @@ class LiveService {
       throw error;
     }
 
+    const cleanedPin = pinCode.trim();
+
     const exam = await prisma.exam.findFirst({
       where: {
-        pinCode: pinCode.trim(),
         status: 'PUBLISHED',
+        OR: [
+          { pinCode: cleanedPin },
+          { code: cleanedPin },
+          { code: { equals: `EXAM-${cleanedPin}`, mode: 'insensitive' } },
+          { code: { contains: cleanedPin, mode: 'insensitive' } },
+        ],
       },
       include: {
         subject: { select: { name: true, code: true } },

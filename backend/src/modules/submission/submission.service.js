@@ -2,9 +2,14 @@ const submissionRepository = require('./submission.repository');
 const prisma = require('../../config/prisma');
 
 class SubmissionService {
-  async startExam(examId, userId) {
-    const exam = await prisma.exam.findUnique({
-      where: { id: examId },
+  async startExam(examIdOrCode, userId) {
+    const exam = await prisma.exam.findFirst({
+      where: {
+        OR: [
+          { id: examIdOrCode },
+          { code: examIdOrCode },
+        ],
+      },
       include: {
         questions: {
           select: {
@@ -44,8 +49,10 @@ class SubmissionService {
       throw error;
     }
 
+    const actualExamId = exam.id;
+
     // Check if user already has an IN_PROGRESS submission for this exam
-    let activeSubmission = await submissionRepository.findActiveSubmission(userId, examId);
+    let activeSubmission = await submissionRepository.findActiveSubmission(userId, actualExamId);
     if (activeSubmission) {
       const fullSubmission = await submissionRepository.findById(activeSubmission.id);
       // Strip isCorrect from questions options
@@ -64,7 +71,7 @@ class SubmissionService {
 
     // Create new submission
     const newSubmission = await submissionRepository.create({
-      examId,
+      examId: actualExamId,
       userId,
       status: 'IN_PROGRESS',
       startedAt: new Date(),
