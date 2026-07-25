@@ -1,0 +1,25 @@
+{
+  "name": "e-learning-mvp",
+  "version": "1.0.0",
+  "private": true,
+  "description": "E-Learning & Quiz System Production-Ready MVP",
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "setup": "npm install && npm run db:push --workspace=backend && npm run seed --workspace=backend",
+    "dev": "concurrently \"npm run dev --workspace=backend\" \"npm run dev --workspace=frontend\"",
+    "dev:backend": "npm run dev --workspace=backend",
+    "dev:frontend": "npm run dev --workspace=frontend",
+    "build": "npm run build --workspace=frontend",
+    "test": "npm run test --workspace=backend",
+    "db:push": "npm run db:push --workspace=backend",
+    "seed": "npm run seed --workspace=backend",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
