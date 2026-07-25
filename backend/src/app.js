@@ -8,6 +8,14 @@ const errorHandler = require('./middlewares/error.middleware');
 const authRoutes = require('./modules/auth/auth.routes');
 const categoryRoutes = require('./modules/category/category.routes');
 const catalogRoutes = require('./modules/catalog/catalog.routes');
+const questionRoutes = require('./modules/question/question.routes');
+const examRoutes = require('./modules/exam/exam.routes');
+const submissionRoutes = require('./modules/submission/submission.routes');
+const liveRoutes = require('./modules/live/live.routes');
+const dashboardRoutes = require('./modules/dashboard/dashboard.routes');
+const leaderboardRoutes = require('./modules/leaderboard/leaderboard.routes');
+const reportRoutes = require('./modules/report/report.routes');
+const auditRoutes = require('./modules/audit/audit.routes');
 
 const app = express();
 
@@ -37,6 +45,14 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/categories', categoryRoutes);
 app.use('/api/v1/catalog', catalogRoutes);
+app.use('/api/v1/questions', questionRoutes);
+app.use('/api/v1/exams', examRoutes);
+app.use('/api/v1/submissions', submissionRoutes);
+app.use('/api/v1/live', liveRoutes);
+app.use('/api/v1/dashboard', dashboardRoutes);
+app.use('/api/v1/leaderboard', leaderboardRoutes);
+app.use('/api/v1/reports', reportRoutes);
+app.use('/api/v1/audit-logs', auditRoutes);
 
 // Global Error Handler
 app.use(errorHandler);

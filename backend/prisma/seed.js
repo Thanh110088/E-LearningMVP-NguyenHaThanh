@@ -114,7 +114,7 @@ async function main() {
     update: {},
     create: {
       title: 'Đề Thi Thử THPT Quốc Gia Môn Toán 2026',
-      description: 'Đề thi chuẩn cấu trúc Bộ GD&ĐT với 50 câu hỏi phân hóa từ dễ đến nâng cao.',
+      description: 'Đề thi chuẩn cấu trúc Bộ GD&ĐT với các câu hỏi phân hóa từ dễ đến nâng cao.',
       code: 'EXAM-THPT-MATH-01',
       thumbnailUrl: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800&auto=format&fit=crop',
       durationMinutes: 90,
@@ -146,6 +146,96 @@ async function main() {
   });
 
   console.log('✅ Sample Exams seeded');
+
+  // 6. Sample Questions for Exam 1 (Math)
+  const existingMathQuestions = await prisma.question.count({ where: { examId: exam1.id } });
+  if (existingMathQuestions === 0) {
+    await prisma.question.create({
+      data: {
+        content: 'Tập xác định của hàm số y = 1 / (x - 2) là:',
+        type: 'SINGLE_CHOICE',
+        points: 5.0,
+        difficulty: 'EASY',
+        explanation: 'Hàm số xác định khi mẫu số khác 0, tức x - 2 ≠ 0 <=> x ≠ 2. Do đó D = R \\ {2}.',
+        examId: exam1.id,
+        subjectId: math.id,
+        options: {
+          create: [
+            { content: 'D = R', isCorrect: false },
+            { content: 'D = R \\ {2}', isCorrect: true },
+            { content: 'D = (2; +∞)', isCorrect: false },
+            { content: 'D = (-∞; 2)', isCorrect: false },
+          ],
+        },
+      },
+    });
+
+    await prisma.question.create({
+      data: {
+        content: 'Đạo hàm của hàm số y = x^3 - 3x + 1 là:',
+        type: 'SINGLE_CHOICE',
+        points: 5.0,
+        difficulty: 'MEDIUM',
+        explanation: 'Ta có y\' = (x^3)\' - (3x)\' + (1)\' = 3x^2 - 3.',
+        examId: exam1.id,
+        subjectId: math.id,
+        options: {
+          create: [
+            { content: 'y\' = 3x^2 - 3', isCorrect: true },
+            { content: 'y\' = 3x^2 + 3', isCorrect: false },
+            { content: 'y\' = x^2 - 3', isCorrect: false },
+            { content: 'y\' = 3x^2', isCorrect: false },
+          ],
+        },
+      },
+    });
+  }
+
+  // 7. Sample Questions for Exam 2 (English)
+  const existingEngQuestions = await prisma.question.count({ where: { examId: exam2.id } });
+  if (existingEngQuestions === 0) {
+    await prisma.question.create({
+      data: {
+        content: 'Choose the correct form: "She ______ to school by bus every day."',
+        type: 'SINGLE_CHOICE',
+        points: 5.0,
+        difficulty: 'EASY',
+        explanation: 'Chủ ngữ "She" số ít ở thì hiện tại đơn đi với động từ thêm "es" -> goes.',
+        examId: exam2.id,
+        subjectId: english.id,
+        options: {
+          create: [
+            { content: 'go', isCorrect: false },
+            { content: 'goes', isCorrect: true },
+            { content: 'going', isCorrect: false },
+            { content: 'went', isCorrect: false },
+          ],
+        },
+      },
+    });
+
+    await prisma.question.create({
+      data: {
+        content: 'Which of the following are primary colors? (Select all that apply)',
+        type: 'MULTIPLE_CHOICE',
+        points: 5.0,
+        difficulty: 'MEDIUM',
+        explanation: 'Primary colors in traditional color theory are Red, Blue, and Yellow.',
+        examId: exam2.id,
+        subjectId: english.id,
+        options: {
+          create: [
+            { content: 'Red', isCorrect: true },
+            { content: 'Green', isCorrect: false },
+            { content: 'Blue', isCorrect: true },
+            { content: 'Yellow', isCorrect: true },
+          ],
+        },
+      },
+    });
+  }
+
+  console.log('✅ Sample Questions & Options seeded');
 }
 
 main()

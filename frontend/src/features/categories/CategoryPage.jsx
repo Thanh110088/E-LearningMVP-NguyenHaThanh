@@ -30,8 +30,8 @@ export const CategoryPage = ({ user }) => {
         api.get('/categories/subjects'),
         api.get('/categories/grades')
       ]);
-      setSubjects(resSub.data || []);
-      setGrades(resGrade.data || []);
+      setSubjects(Array.isArray(resSub.data?.data) ? resSub.data.data : Array.isArray(resSub.data) ? resSub.data : []);
+      setGrades(Array.isArray(resGrade.data?.data) ? resGrade.data.data : Array.isArray(resGrade.data) ? resGrade.data : []);
     } catch (err) {
       console.error(err);
     } finally {

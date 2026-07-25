@@ -27,8 +27,8 @@ export const CatalogPage = () => {
         api.get('/categories/subjects'),
         api.get('/categories/grades')
       ]);
-      setSubjects(resSub.data || []);
-      setGrades(resGrade.data || []);
+      setSubjects(Array.isArray(resSub.data?.data) ? resSub.data.data : Array.isArray(resSub.data) ? resSub.data : []);
+      setGrades(Array.isArray(resGrade.data?.data) ? resGrade.data.data : Array.isArray(resGrade.data) ? resGrade.data : []);
     } catch (err) {
       console.error(err);
     }
@@ -43,7 +43,7 @@ export const CatalogPage = () => {
       if (searchQuery) params.search = searchQuery;
 
       const res = await api.get('/catalog/exams', { params });
-      setExams(res.data || []);
+      setExams(Array.isArray(res.data?.data) ? res.data.data : Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error(err);
     } finally {

@@ -11,10 +11,7 @@ Chào mừng bạn đến với dự án **E-Learning & Quiz System**!
 ## 2. Các bước cài đặt & chạy ứng dụng
 
 ### Bước 1: Khởi chạy Database
-Sử dụng Docker Compose để khởi chạy PostgreSQL local:
-```bash
-npm run docker:up
-```
+Đảm bảo ứng dụng PostgreSQL local đã được cài đặt và đang chạy trên máy (mặc định cổng 5432). Cấu hình connection string `DATABASE_URL` tương ứng trong file `backend/.env`.
 
 ### Bước 2: Cài đặt Dependencies & Khởi tạo Môi trường
 ```bash

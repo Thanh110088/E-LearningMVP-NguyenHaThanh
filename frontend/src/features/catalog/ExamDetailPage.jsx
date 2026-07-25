@@ -19,7 +19,7 @@ export const ExamDetailPage = ({ user }) => {
   const fetchExamDetail = async () => {
     try {
       const res = await api.get(`/catalog/exams/${id}`);
-      setExam(res.data);
+      setExam(res.data?.data || res.data);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -100,7 +100,7 @@ export const ExamDetailPage = ({ user }) => {
             <Button
               variant="primary"
               size="lg"
-              onClick={() => alert('Sprint 2 Engine đang chuẩn bị triển khai! Đề thi sẵn sàng.')}
+              onClick={() => navigate(`/exams/${exam.id}/take`)}
             >
               <PlayCircle className="w-5 h-5 mr-2" /> Bắt Đầu Làm Bài
             </Button>

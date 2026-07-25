@@ -23,13 +23,23 @@ export const Header = ({ user, onLogout }) => {
         </Link>
 
         {/* Navigation */}
-        <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-slate-300">
+        <nav className="hidden md:flex items-center gap-5 text-sm font-medium text-slate-300">
           <Link to="/" className="hover:text-indigo-400 transition-colors">Khám Phá Đề Thi</Link>
-          <Link to="/categories" className="hover:text-indigo-400 transition-colors">Môn Học & Khối Lớp</Link>
+          <Link to="/live" className="hover:text-rose-400 transition-colors font-bold text-rose-400">Live PIN</Link>
+          <Link to="/leaderboard" className="hover:text-amber-400 transition-colors">Bảng Xếp Hạng</Link>
+          <Link to="/categories" className="hover:text-indigo-400 transition-colors">Môn Học</Link>
+          {(user?.role === 'TEACHER' || user?.role === 'ADMIN') && (
+            <>
+              <Link to="/questions" className="hover:text-indigo-400 transition-colors">Ngân Hàng Câu Hỏi</Link>
+              <Link to="/manage-exams" className="hover:text-indigo-400 transition-colors">Đề Thi</Link>
+              <Link to="/dashboard" className="hover:text-indigo-400 transition-colors">Dashboard</Link>
+              <Link to="/reports" className="hover:text-indigo-400 transition-colors">Báo Cáo</Link>
+            </>
+          )}
           {user?.role === 'ADMIN' && (
-            <span className="text-xs font-semibold px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30 flex items-center gap-1">
-              <ShieldCheck className="w-3.5 h-3.5" /> Admin
-            </span>
+            <Link to="/audit-logs" className="text-xs font-semibold px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30 flex items-center gap-1 hover:bg-rose-500/30">
+              <ShieldCheck className="w-3.5 h-3.5" /> Audit Log
+            </Link>
           )}
         </nav>
 
