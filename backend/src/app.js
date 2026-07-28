@@ -24,6 +24,11 @@ app.use(cors({ origin: config.corsOrigin, credentials: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Root welcome route
+app.get('/', (req, res) => {
+  res.status(200).json({ status: 'OK', message: 'E-Learning & Quiz System API is running', docs: '/api-docs' });
+});
+
 // Healthcheck
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'OK', message: 'E-Learning API is operational', timestamp: new Date() });
