@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, Plus, Edit3, Trash2, CheckCircle2, Clock, Award, HelpCircle } from 'lucide-react';
+import { FileText, Plus, Edit3, Trash2, CheckCircle2, Clock, Award, HelpCircle, Sparkles } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { ExamModal } from './ExamModal';
+import { AssignQuestionModal } from './AssignQuestionModal';
 import api from '../../lib/axios';
 
 export const ExamManagePage = ({ user }) => {
@@ -12,6 +13,9 @@ export const ExamManagePage = ({ user }) => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [examToEdit, setExamToEdit] = useState(null);
+
+  const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
+  const [selectedAssignExam, setSelectedAssignExam] = useState(null);
 
   useEffect(() => {
     fetchMetadata();
@@ -53,6 +57,11 @@ export const ExamManagePage = ({ user }) => {
     setIsModalOpen(true);
   };
 
+  const handleOpenAssign = (exam) => {
+    setSelectedAssignExam(exam);
+    setIsAssignModalOpen(true);
+  };
+
   const handleDelete = async (id) => {
     if (!window.confirm('Bạn có chắc chắn muốn xóa đề thi này?')) return;
     try {
@@ -83,7 +92,7 @@ export const ExamManagePage = ({ user }) => {
           </div>
           <div>
             <h1 className="text-2xl font-bold text-slate-100">Quản Lý Đề Thi</h1>
-            <p className="text-sm text-slate-400">Tạo mới, chỉnh sửa và xuất bản các đề thi trắc nghiệm</p>
+            <p className="text-sm text-slate-400">Tạo mới, chỉnh sửa, gán nhanh câu hỏi và xuất bản đề thi</p>
           </div>
         </div>
 
@@ -147,6 +156,9 @@ export const ExamManagePage = ({ user }) => {
                 </span>
 
                 <div className="flex items-center gap-2">
+                  <Button variant="primary" size="sm" onClick={() => handleOpenAssign(exam)} className="text-xs font-bold px-2.5 py-1">
+                    <Sparkles className="w-3.5 h-3.5 mr-1" /> Gán Câu Hỏi
+                  </Button>
                   <Button variant="outline" size="sm" onClick={() => handleOpenEdit(exam)}>
                     <Edit3 className="w-3.5 h-3.5 mr-1" /> Sửa
                   </Button>
@@ -160,13 +172,20 @@ export const ExamManagePage = ({ user }) => {
         </div>
       )}
 
-      {/* Modal */}
+      {/* Modals */}
       <ExamModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         examToEdit={examToEdit}
         subjects={subjects}
         grades={grades}
+        onSaveSuccess={fetchExams}
+      />
+
+      <AssignQuestionModal
+        isOpen={isAssignModalOpen}
+        onClose={() => setIsAssignModalOpen(false)}
+        exam={selectedAssignExam}
         onSaveSuccess={fetchExams}
       />
     </div>

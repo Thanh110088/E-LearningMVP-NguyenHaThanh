@@ -20,9 +20,9 @@ export const ExamResultPage = ({ user }) => {
     setLoading(true);
     try {
       const res = await api.get(`/submissions/${submissionId}/result`);
-      setResult(res.data.data);
+      setResult(res.data?.data || res.data || res);
     } catch (err) {
-      setError(err.response?.data?.message || 'Không thể tải kết quả thi');
+      setError(err.message || err.response?.data?.message || 'Không thể tải kết quả thi');
     } finally {
       setLoading(false);
     }

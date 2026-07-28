@@ -41,10 +41,21 @@ export const TakeExamPage = ({ user }) => {
   }, [timeLeftSeconds]);
 
   const startExamSession = async () => {
+    if (!examId || examId === ':id') {
+      setError('Mã bài thi không hợp lệ. Vui lòng quay lại Trang Chủ để chọn lại đề thi.');
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     try {
       const res = await api.post(`/submissions/start/${examId}`);
-      const subData = res.data.data;
+      const subData = res.data?.data || res.data || res;
+      
+      if (!subData || !subData.exam) {
+        throw new Error('Dữ liệu bài thi không hợp lệ');
+      }
+
       setSubmission(subData);
       setExam(subData.exam);
 
@@ -63,7 +74,8 @@ export const TakeExamPage = ({ user }) => {
       const remaining = Math.max(0, durationSec - elapsedSec);
       setTimeLeftSeconds(remaining);
     } catch (err) {
-      setError(err.response?.data?.message || 'Không thể bắt đầu lượt làm bài thi');
+      console.error('Lỗi khởi tạo lượt thi:', err);
+      setError(err.message || err.response?.data?.message || 'Không thể bắt đầu lượt làm bài thi');
     } finally {
       setLoading(false);
     }
@@ -119,9 +131,14 @@ export const TakeExamPage = ({ user }) => {
 
   if (error || !exam) {
     return (
-      <div className="max-w-xl mx-auto my-12 p-6 glass-panel rounded-2xl text-center space-y-4">
-        <AlertTriangle className="w-12 h-12 text-rose-400 mx-auto" />
-        <h3 className="text-xl font-bold text-slate-200">{error || 'Không tìm thấy thông tin bài thi'}</h3>
+      <div className="max-w-xl mx-auto my-12 p-8 glass-panel rounded-3xl text-center space-y-4 border border-rose-500/30">
+        <AlertTriangle className="w-14 h-14 text-rose-400 mx-auto animate-bounce" />
+        <h3 className="text-xl font-bold text-slate-100">{error || 'Không thể bắt đầu lượt làm bài thi'}</h3>
+        {error?.includes('chưa có câu hỏi') && (
+          <p className="text-xs text-slate-400 leading-relaxed bg-slate-900 p-3 rounded-xl border border-slate-800">
+            💡 <strong>Hướng dẫn:</strong> Đề thi này hiện đang có <strong>0 câu hỏi</strong>. Giáo viên cần vào trang <strong>"Đề Thi" ➔ nhấn nút "⚡ Gán Câu Hỏi"</strong> để thêm câu hỏi vào đề trước khi Học sinh bắt đầu thi.
+          </p>
+        )}
         <Button variant="primary" onClick={() => navigate('/')}>
           Trở về Trang Chủ
         </Button>

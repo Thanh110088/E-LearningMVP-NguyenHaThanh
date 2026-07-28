@@ -100,7 +100,7 @@ export const ExamDetailPage = ({ user }) => {
             <Button
               variant="primary"
               size="lg"
-              onClick={() => navigate(`/exams/${exam.id}/take`)}
+              onClick={() => navigate(`/exams/${exam?.id || id}/take`)}
             >
               <PlayCircle className="w-5 h-5 mr-2" /> Bắt Đầu Làm Bài
             </Button>

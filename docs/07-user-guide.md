@@ -24,6 +24,7 @@ Sau khi chạy lệnh `npm run setup` hoặc `npm run seed`, hệ thống đã c
 3. Để tạo câu hỏi mới:
    - Nhấn nút **"+ Thêm Câu Hỏi Mới"** ở góc phải trên.
    - **Chọn Môn học** (VD: Toán Học, Tiếng Anh, Vật Lý...).
+   - **Chọn Đề thi gán kèm (Tùy chọn)**: Chọn tên đề thi bạn muốn đưa câu hỏi này vào.
    - **Chọn Loại câu hỏi**:
      - *Một đáp án (Single choice)*: Chọn 1 nút tròn đúng.
      - *Nhiều đáp án (Multiple choice)*: Chọn nhiều đáp án đúng.
@@ -37,19 +38,14 @@ Sau khi chạy lệnh `npm run setup` hoặc `npm run seed`, hệ thống đã c
 
 ---
 
-### 2. Hướng dẫn Tạo Đề Thi & Xuất Bản Đề Thi
-1. Trên thanh menu, nhấn vào mục **"Đề Thi"** (hoặc truy cập `/manage-exams`).
-2. Nhấn nút **"+ Tạo Đề Thi Mới"**.
-3. Nhập thông tin đề thi:
-   - **Tên đề thi**: VD "Đề Kiểm Tra Giữa Kỳ I Môn Toán Lớp 10".
-   - **Mã đề thi**: VD `EXAM-MATH-10-01`.
-   - **Chọn Môn học & Khối lớp**.
-   - **Thời gian làm bài (Phút)**: VD 45 phút hoặc 90 phút.
-   - **Tổng điểm & Điểm đạt**: VD Tổng 10 điểm, Điểm đạt 5.0 điểm.
-   - **Trạng thái**: Chọn `DRAFT` (Bản nháp) hoặc `PUBLISHED` (Xuất bản).
-   - **Nhập Mô tả chi tiết** đề thi.
-4. Nhấn **"Tạo Đề Thi"**.
-5. **Xuất bản đề thi**: Bạn có thể nhấn trực tiếp vào nút Badge trạng thái (`DRAFT` / `PUBLISHED`) trên thẻ đề thi để nhanh chóng chuyển đổi trạng thái cho phép học sinh vào làm bài.
+### 2. Cách Gán & Tạo Nhanh Câu Hỏi Vào Đề Thi (Cực Nhanh)
+Để tạo đề thi và đưa câu hỏi vào đề một cách nhanh nhất mà không phải thao tác nhiều lần:
+1. Đăng nhập tài khoản Giáo viên ➔ Vào trang **"Đề Thi"** (`/manage-exams`).
+2. Trên mỗi thẻ Đề Thi, nhấn nút **"⚡ Gán Câu Hỏi"**.
+3. Cửa sổ Modal hiện lên với 2 lựa chọn siêu tốc:
+   - **Tab 1 - Chọn từ Ngân hàng**: Tích chọn nhanh các câu hỏi sẵn có và nhấn *"Lưu & Cập Nhật Đề Thi"*.
+   - **Tab 2 - Tạo Nhanh Câu Hỏi Mới**: Nhập nhanh nội dung + 4 đáp án A, B, C, D ➔ Nhấn *"Tạo & Gán Trực Tiếp Vào Đề Thi Này"*. Câu hỏi sẽ được tự động lưu và đưa thẳng vào đề thi ngay lập tức!
+4. Nhấn nút Badge **`DRAFT` / `PUBLISHED`** trên thẻ đề thi để xuất bản bài thi cho học sinh làm.
 
 ---
 
@@ -81,10 +77,12 @@ Sau khi chạy lệnh `npm run setup` hoặc `npm run seed`, hệ thống đã c
 ---
 
 ## 2. Hướng dẫn Tham Gia Phòng Thi Live Bằng Mã PIN
-1. Khi giáo viên tổ chức một buổi thi trực tiếp và cung cấp cho bạn một **Mã PIN** (VD: `EXAM-THPT-MATH-01`).
-2. Trên thanh menu, nhấn vào mục màu đỏ **"Live PIN"** (hoặc truy cập `/live`).
-3. Nhập mã PIN vào ô giữa màn hình và nhấn **"Vào Phòng Thi Ngay"**.
-4. Hệ thống sẽ kiểm tra mã PIN và đưa bạn trực tiếp vào phòng thi trực tuyến.
+1. Khi giáo viên tạo đề thi (VD mã đề: `EXAM-539918`, `EXAM-802073`, `EXAM-THPT-MATH-01`, `EXAM-ENG-10-MID`...):
+   - Giáo viên cấp cho bạn mã số phía sau (VD: `539918` hoặc `802073`) hoặc toàn bộ mã đề.
+   - Lưu ý: Đề thi phải ở trạng thái **`PUBLISHED`** (màu xanh).
+2. Học sinh đăng nhập ➔ Trên thanh menu, nhấn vào mục màu đỏ **"Live PIN"** (hoặc truy cập `/live`).
+3. Nhập mã PIN (VD: `539918`) vào ô giữa màn hình và nhấn **"Vào Phòng Thi Ngay"**.
+4. Hệ thống sẽ xác thực mã PIN linh hoạt và đưa bạn trực tiếp vào phòng thi trực tuyến.
 
 ---
 
