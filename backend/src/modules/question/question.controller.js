@@ -5,7 +5,8 @@ class QuestionController {
   async getQuestions(req, res, next) {
     try {
       const { subjectId, examId, difficulty, type } = req.query;
-      const questions = await questionService.getAllQuestions({ subjectId, examId, difficulty, type });
+      const workspaceId = req.headers['x-workspace-id'] || req.query.workspaceId;
+      const questions = await questionService.getAllQuestions({ subjectId, examId, difficulty, type, workspaceId });
       return sendSuccess(res, 'Lấy danh sách câu hỏi thành công', questions);
     } catch (error) {
       next(error);
@@ -23,7 +24,10 @@ class QuestionController {
 
   async createQuestion(req, res, next) {
     try {
-      const question = await questionService.createQuestion(req.body);
+      const workspaceId = req.headers['x-workspace-id'] || req.body.workspaceId;
+      const questionData = { ...req.body };
+      if (workspaceId) questionData.workspaceId = workspaceId;
+      const question = await questionService.createQuestion(questionData, req.user?.id);
       return sendSuccess(res, 'Tạo câu hỏi thành công', question, 201);
     } catch (error) {
       next(error);

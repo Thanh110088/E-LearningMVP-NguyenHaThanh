@@ -1,47 +1,37 @@
-# 02. Epics & Tính Năng Hệ Thống (Epics & Features)
+# 02. Danh Sách Epics & Tính Năng ETech (Epics & Features)
 
-Chi tiết các Epic và danh sách tính năng đã được triển khai trọn vẹn trong hệ thống:
+## Danh sách các Epics chính
 
----
-
-## Epic 1: Quản Lý Tài Khoản & Phân Quyền (Auth & Users)
-- **Đăng ký / Đăng nhập**: Xác thực JWT Access Token & Refresh Token an toàn.
-- **Phân quyền Role-based**: ADMIN, TEACHER, STUDENT.
-- **Thông tin cá nhân**: API `/api/v1/auth/me` tự động khôi phục phiên làm việc.
-
----
-
-## Epic 2: Quản Lý Danh Mục (Categories)
-- **Môn Học (Subject)**: Quản lý mã môn, tên môn học (Toán, Tiếng Anh, Vật Lý...).
-- **Khối Lớp (Grade)**: Quản lý khối lớp (Khối 10, Khối 12...).
+### 1. Epic 1: ETech Core & SaaS Subscriptions (Tái cấu trúc UI & Nâng cấp gói)
+- **FE-1.1**: Header ETech đa kênh (`Trang chủ`, `Khám phá`, `Bảng giá`, `Live PIN`, User Plan Pill).
+- **FE-1.2**: Trang chủ Home Page (Hero section, 3 nút hành động, 6 thẻ tính năng).
+- **FE-1.3**: Trang Bảng giá Pricing Page (3 gói cước Free, Pro 99k, Enterprise + Bảng so sánh).
+- **FE-1.4**: Modal nâng cấp gói cước UpgradeModal (Quét mã VietQR/MoMo, nâng cấp tài khoản tức thì lên Pro/Enterprise).
+- **BE-1.1**: Module Subscription API (`GET /my-plan`, `POST /upgrade`, `GET /history`).
 
 ---
 
-## Epic 3: Ngân Hàng Câu Hỏi & Đề Thi (Question Bank & Exams)
-- **Ngân hàng câu hỏi**:
-  - Hỗ trợ loại câu hỏi: Single Choice (Một đáp án), Multiple Choice (Nhiều đáp án), True/False (Đúng/Sai).
-  - Cấu hình độ khó (Dễ, Trung bình, Khó), điểm số và lời giải chi tiết (Explanation).
-- **Quản lý đề thi**:
-  - Cấu hình mã đề, tiêu đề, thời gian làm bài (phút), tổng điểm và điểm đạt.
-  - Quản lý trạng thái đề thi: `DRAFT` (Nháp) vs `PUBLISHED` (Xuất bản).
+### 2. Epic 2: Khám Phá & Bộ Lọc Thư Viện Đề Thi (Explore Catalog 3 Cột)
+- **FE-2.1**: Giao diện Thư viện đề thi 3 cột (Sidebar lọc môn học/lớp, Grid đề thi giữa, Top 5 Đề thi phổ biến bên phải).
+- **FE-2.2**: Tìm kiếm thông minh theo từ khóa đề thi và tên giáo viên.
 
 ---
 
-## Epic 4: Engine Làm Bài & Chấm Điểm Tự Động (Exam Engine)
-- **Khám phá đề thi**: Lọc đề thi theo môn học, khối lớp và từ khóa tìm kiếm.
-- **Phòng thi trực tuyến**: Đồng hồ đếm ngược (Countdown Timer), bảng điều hướng danh sách câu hỏi, lưu lựa chọn tạm thời và tự động nộp bài khi hết giờ.
-- **Thuật toán chấm điểm tự động**: Chấm điểm chính xác theo loại câu hỏi và tổng hợp kết quả ĐẠT / KHÔNG ĐẠT.
-- **Xem lại bài làm**: Hiển thị kết quả chi tiết, lựa chọn của học sinh, đáp án đúng và lời giải giải thích.
+### 3. Epic 3: Ngân Hàng Câu Hỏi & Quản Lý Đề Thi (Question Bank & Exam Management)
+- **FE-3.1**: Ngân hàng câu hỏi trắc nghiệm (Single choice, Multiple choice, True/False).
+- **FE-3.2**: Modal gán siêu tốc câu hỏi vào đề thi.
+- **BE-3.1**: Kiểm tra hạn mức tạo đề/câu hỏi theo gói cước (Free: 10 đề / 200 câu; Pro: 100 đề / 5000 câu).
 
 ---
 
-## Epic 5: Live Room, Dashboard & Bảng Xếp Hạng
-- **Phòng thi Live (Mã PIN)**: Học sinh nhập mã PIN 6 ký tự để tham gia thi trực tiếp.
-- **Dashboard Thống kê**: Thẻ chỉ số tổng quan, biểu đồ Recharts tỷ lệ Đạt/Không đạt và bảng lịch sử làm bài gần đây.
-- **Bảng Xếp Hạng (Leaderboard)**: Bục vinh danh Top 1, 2, 3 và danh sách thứ hạng học sinh điểm cao nhất.
+### 4. Epic 4: Engine Thi Trực Tuyến & Live Room PIN Engine
+- **FE-4.1**: Phòng thi đếm ngược đếm giờ realtime, tự động nộp bài khi hết giờ.
+- **FE-4.2**: Live Room PIN Engine hỗ trợ học sinh thi trực tiếp bằng mã PIN 6 ký tự.
+- **BE-4.1**: Thuật toán chấm điểm tự động & trả kết quả kèm lời giải chi tiết.
 
 ---
 
-## Epic 6: Báo Cáo & Audit Log
-- **Báo cáo & Export CSV**: Xem danh sách kết quả làm bài và xuất file CSV `elearning-submissions-report.csv`.
-- **Nhật ký Audit Log**: Theo dõi lịch sử thao tác người dùng, thời gian và địa chỉ IP dành cho Admin.
+### 5. Epic 5: Analytics Dashboard, Báo Cáo & Audit Logs
+- **FE-5.1**: Dashboard thống kê tỷ lệ phần trăm sinh viên Đạt/Không đạt qua biểu đồ Recharts.
+- **FE-5.2**: Xuất báo cáo điểm thi định dạng file CSV.
+- **FE-5.3**: Nhật ký theo dõi hoạt động hệ thống Audit Log dành cho Admin.

@@ -15,12 +15,14 @@ class ExamController {
   async getMyExams(req, res, next) {
     try {
       const { search, subjectId, gradeId, status } = req.query;
+      const workspaceId = req.headers['x-workspace-id'];
       const exams = await examService.getAllExams({
         search,
         subjectId,
         gradeId,
         status,
         createdById: req.user.id,
+        workspaceId,
       });
       return sendSuccess(res, 'Lấy danh sách đề thi của tôi thành công', exams);
     } catch (error) {
@@ -39,7 +41,10 @@ class ExamController {
 
   async createExam(req, res, next) {
     try {
-      const exam = await examService.createExam(req.body, req.user.id);
+      const workspaceId = req.headers['x-workspace-id'] || req.body.workspaceId;
+      const examData = { ...req.body };
+      if (workspaceId) examData.workspaceId = workspaceId;
+      const exam = await examService.createExam(examData, req.user.id);
       return sendSuccess(res, 'Tạo đề thi thành công', exam, 201);
     } catch (error) {
       next(error);

@@ -1,7 +1,14 @@
-const prisma = require('../../config/prisma');
+const prisma = require("../../config/prisma");
 
 class CatalogRepository {
-  async findExams({ subjectId, gradeId, search, status = 'PUBLISHED', page = 1, limit = 10 }) {
+  async findExams({
+    subjectId,
+    gradeId,
+    search,
+    status = "PUBLISHED",
+    page = 1,
+    limit = 10,
+  }) {
     const skip = (page - 1) * limit;
     const where = {
       status,
@@ -9,11 +16,11 @@ class CatalogRepository {
       ...(gradeId && { gradeId }),
       ...(search && {
         OR: [
-          { title: { contains: search, mode: 'insensitive' } },
-          { description: { contains: search, mode: 'insensitive' } },
-          { code: { contains: search, mode: 'insensitive' } },
-        ]
-      })
+          { title: { contains: search, mode: "insensitive" } },
+          // { description: { contains: search, mode: 'insensitive' } },
+          { code: { contains: search, mode: "insensitive" } },
+        ],
+      }),
     };
 
     const [items, total] = await Promise.all([
@@ -21,15 +28,15 @@ class CatalogRepository {
         where,
         skip,
         take: limit,
-        orderBy: { createdAt: 'desc' },
+        orderBy: { createdAt: "desc" },
         include: {
           subject: { select: { id: true, name: true, code: true, icon: true } },
           grade: { select: { id: true, name: true, code: true } },
           createdBy: { select: { id: true, fullName: true, avatarUrl: true } },
-          _count: { select: { questions: true, submissions: true } }
-        }
+          _count: { select: { questions: true, submissions: true } },
+        },
       }),
-      prisma.exam.count({ where })
+      prisma.exam.count({ where }),
     ]);
 
     return {
@@ -38,25 +45,22 @@ class CatalogRepository {
         total,
         page: Number(page),
         limit: Number(limit),
-        totalPages: Math.ceil(total / limit)
-      }
+        totalPages: Math.ceil(total / limit),
+      },
     };
   }
 
   async findExamById(idOrCode) {
     return prisma.exam.findFirst({
       where: {
-        OR: [
-          { id: idOrCode },
-          { code: idOrCode },
-        ],
+        OR: [{ id: idOrCode }, { code: idOrCode }],
       },
       include: {
         subject: { select: { id: true, name: true, code: true } },
         grade: { select: { id: true, name: true, code: true } },
         createdBy: { select: { id: true, fullName: true } },
-        _count: { select: { questions: true, submissions: true } }
-      }
+        _count: { select: { questions: true, submissions: true } },
+      },
     });
   }
 }

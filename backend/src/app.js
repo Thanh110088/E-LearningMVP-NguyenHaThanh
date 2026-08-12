@@ -16,6 +16,9 @@ const dashboardRoutes = require('./modules/dashboard/dashboard.routes');
 const leaderboardRoutes = require('./modules/leaderboard/leaderboard.routes');
 const reportRoutes = require('./modules/report/report.routes');
 const auditRoutes = require('./modules/audit/audit.routes');
+const subscriptionRoutes = require('./modules/subscription/subscription.routes');
+const adminRoutes = require('./modules/admin/admin.routes');
+const workspaceRoutes = require('./modules/workspace/workspace.routes');
 
 const app = express();
 
@@ -58,6 +61,10 @@ app.use('/api/v1/dashboard', dashboardRoutes);
 app.use('/api/v1/leaderboard', leaderboardRoutes);
 app.use('/api/v1/reports', reportRoutes);
 app.use('/api/v1/audit-logs', auditRoutes);
+app.use('/api/v1/subscription', subscriptionRoutes);
+app.use('/api/v1/admin', adminRoutes);
+app.use('/api/v1/workspaces', workspaceRoutes);
+app.use('/api/workspaces', workspaceRoutes);
 
 // Global Error Handler
 app.use(errorHandler);

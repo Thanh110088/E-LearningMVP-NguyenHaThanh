@@ -1,4 +1,4 @@
-# 04. Kiến Trúc Hệ Thống (System Architecture)
+# 04. Kiến Trúc Hệ Thống ETech (System Architecture)
 
 ## 1. Môi trường & Công nghệ sử dụng
 
@@ -11,35 +11,35 @@
 
 ---
 
-## 2. Mô hình Kiến trúc Backend (Layered Architecture)
-Hệ thống Backend được thiết kế theo phân lớp rõ ràng nhằm phân tách trách nhiệm:
+## 2. Mô hình Kiến trúc Backend & Subscription Module
 ```text
 HTTP Request
      │
      ▼
-[ Routes ] ───────> Nơi định tuyến và áp dụng Middleware (Auth, Authorize)
+[ Routes ] ───────> Nơi định tuyến API (/api/v1/subscription, /api/v1/exams, ...)
      │
      ▼
-[ Controller ] ───> Tiếp nhận tham số Request, trả về JSON thành công/lỗi
+[ Controller ] ───> Tiếp nhận tham số Request, trả về JSON chuẩn sendSuccess
      │
      ▼
-[ Service ] ──────> Xử lý toàn bộ Business Logic & Thuật toán chấm điểm tự động
+[ Service ] ──────> Xử lý Business Logic, kiểm tra giới hạn gói Free/Pro/Enterprise
      │
      ▼
-[ Repository ] ───> Thực thi truy vấn dữ liệu qua Prisma ORM
+[ Repository ] ───> Truy vấn CSDL PostgreSQL qua Prisma ORM
      │
      ▼
-[ PostgreSQL DB ]
+[ PostgreSQL DB ] (Các bảng users, subscriptions, exams, questions, submissions...)
 ```
 
 ---
 
 ## 3. Cấu trúc bảng Database (Prisma Schema Summary)
-- `users`: Quản lý người dùng, vai trò (ADMIN, TEACHER, STUDENT).
+- `users`: Quản lý người dùng, vai trò (ADMIN, TEACHER, STUDENT), gói cước `plan` (`FREE`, `PRO`, `ENTERPRISE`) và thời hạn `planExpiresAt`.
+- `subscriptions`: Quản lý lịch sử đăng ký & giao dịch nâng cấp gói cước (`userId`, `plan`, `amount`, `paymentMethod`, `status`, `expiresAt`).
 - `subjects`: Danh mục môn học.
-- `grades`: Danh mục khối lớp.
-- `exams`: Thông tin đề thi, thời gian, điểm số, mã PIN, trạng thái (DRAFT/PUBLISHED).
+- `grades`: Danh mục khối lớp (THPT, THCS, TIỂU HỌC).
+- `exams`: Thông tin đề thi, thời gian, điểm số, mã PIN, trạng thái (`DRAFT`/`PUBLISHED`).
 - `questions`: Ngân hàng câu hỏi (nội dung, loại câu hỏi, độ khó, điểm số, lời giải).
 - `options`: Các đáp án lựa chọn và cờ `isCorrect`.
-- `submissions`: Kết quả lượt thi của học sinh, điểm số, trạng thái (IN_PROGRESS/COMPLETED), kết quả ĐẠT/KHÔNG ĐẠT và lưu câu trả lời JSON.
+- `submissions`: Kết quả lượt thi của học sinh.
 - `audit_logs`: Nhật ký theo dõi hoạt động người dùng.

@@ -1,12 +1,13 @@
 const prisma = require('../../config/prisma');
 
 class QuestionRepository {
-  async findAll({ subjectId, examId, difficulty, type }) {
+  async findAll({ subjectId, examId, difficulty, type, workspaceId }) {
     const where = {};
     if (subjectId) where.subjectId = subjectId;
     if (examId) where.examId = examId;
     if (difficulty) where.difficulty = difficulty;
     if (type) where.type = type;
+    if (workspaceId) where.workspaceId = workspaceId;
 
     return prisma.question.findMany({
       where,

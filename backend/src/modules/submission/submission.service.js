@@ -1,8 +1,22 @@
 const submissionRepository = require('./submission.repository');
+const auditService = require('../audit/audit.service');
 const prisma = require('../../config/prisma');
 
 class SubmissionService {
   async startExam(examIdOrCode, userId) {
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      const error = new Error('Không tìm thấy tài khoản người dùng');
+      error.statusCode = 404;
+      throw error;
+    }
+
+    if (user.role === 'TEACHER' || user.role === 'ADMIN') {
+      const error = new Error('Tài khoản Giáo viên và Admin chỉ có quyền quản lý, không được phép tham gia lượt làm bài thi của học sinh.');
+      error.statusCode = 403;
+      throw error;
+    }
+
     const exam = await prisma.exam.findFirst({
       where: {
         OR: [
@@ -77,10 +91,17 @@ class SubmissionService {
       startedAt: new Date(),
     });
 
+    auditService.logAction({
+      userId,
+      action: 'START_EXAM',
+      resource: 'Submission',
+      details: { examId: actualExamId, submissionId: newSubmission.id },
+    });
+
     return newSubmission;
   }
 
-  async submitExam(submissionId, answers, userId) {
+  async submitExam(submissionId, answers, userId, tabSwitchCount = 0) {
     const submission = await submissionRepository.findById(submissionId);
     if (!submission) {
       const error = new Error('Không tìm thấy lượt làm bài');
@@ -138,12 +159,24 @@ class SubmissionService {
 
     const isPassed = totalScore >= submission.exam.passPoints;
 
+    const answersPayload = {
+      answers: Array.isArray(answers) ? answers : [],
+      tabSwitchCount: Number(tabSwitchCount) || 0,
+    };
+
     const updatedSubmission = await submissionRepository.update(submissionId, {
       score: totalScore,
       isPassed,
       status: 'COMPLETED',
       submittedAt: new Date(),
-      answersJson: answers,
+      answersJson: answersPayload,
+    });
+
+    auditService.logAction({
+      userId,
+      action: 'SUBMIT_EXAM',
+      resource: 'Submission',
+      details: { submissionId, score: totalScore, isPassed, tabSwitchCount: Number(tabSwitchCount) || 0 },
     });
 
     return {

@@ -15,8 +15,8 @@ class SubmissionController {
   async submitExam(req, res, next) {
     try {
       const submissionId = req.params.id;
-      const { answers } = req.body;
-      const result = await submissionService.submitExam(submissionId, answers, req.user.id);
+      const { answers, tabSwitchCount } = req.body;
+      const result = await submissionService.submitExam(submissionId, answers, req.user.id, tabSwitchCount);
       return sendSuccess(res, 'Nộp bài thi thành công', result);
     } catch (error) {
       next(error);

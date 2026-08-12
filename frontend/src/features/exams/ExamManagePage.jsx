@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, Plus, Edit3, Trash2, CheckCircle2, Clock, Award, HelpCircle, Sparkles } from 'lucide-react';
+import { FileText, Plus, Edit3, Trash2, CheckCircle2, Clock, Award, HelpCircle, Sparkles, Radio } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { ExamModal } from './ExamModal';
 import { AssignQuestionModal } from './AssignQuestionModal';
+import { LiveHostDashboard } from '../live/LiveHostDashboard';
+import { useWorkspace } from '../../context/WorkspaceContext';
 import api from '../../lib/axios';
 
 export const ExamManagePage = ({ user }) => {
+  const { activeWorkspace, activeWorkspaceId } = useWorkspace();
   const [exams, setExams] = useState([]);
   const [subjects, setSubjects] = useState([]);
   const [grades, setGrades] = useState([]);
@@ -16,11 +19,24 @@ export const ExamManagePage = ({ user }) => {
 
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
   const [selectedAssignExam, setSelectedAssignExam] = useState(null);
+  const [activeLiveExamId, setActiveLiveExamId] = useState(null);
 
   useEffect(() => {
     fetchMetadata();
-    fetchExams();
   }, []);
+
+  useEffect(() => {
+    fetchExams();
+  }, [activeWorkspaceId]);
+
+  if (activeLiveExamId) {
+    return (
+      <LiveHostDashboard
+        examId={activeLiveExamId}
+        onBack={() => setActiveLiveExamId(null)}
+      />
+    );
+  }
 
   const fetchMetadata = async () => {
     try {
@@ -155,7 +171,13 @@ export const ExamManagePage = ({ user }) => {
                   {exam.subject?.name} • {exam.grade?.name}
                 </span>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap justify-end">
+                  <button
+                    onClick={() => setActiveLiveExamId(exam.id)}
+                    className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-rose-600 via-purple-600 to-indigo-600 hover:from-rose-500 hover:to-indigo-500 text-white text-xs font-black shadow-lg shadow-rose-600/20 flex items-center gap-1.5 transition transform active:scale-95"
+                  >
+                    <Radio className="w-3.5 h-3.5 animate-pulse" /> Thi Live
+                  </button>
                   <Button variant="primary" size="sm" onClick={() => handleOpenAssign(exam)} className="text-xs font-bold px-2.5 py-1">
                     <Sparkles className="w-3.5 h-3.5 mr-1" /> Gán Câu Hỏi
                   </Button>

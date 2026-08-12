@@ -13,6 +13,18 @@ enum RoleName {
   STUDENT
 }
 
+enum UserPlan {
+  FREE
+  PRO
+  ENTERPRISE
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  EXPIRED
+  CANCELLED
+}
+
 enum QuestionType {
   SINGLE_CHOICE
   MULTIPLE_CHOICE
@@ -38,21 +50,43 @@ enum SubmissionStatus {
 }
 
 model User {
-  id           String       @id @default(uuid())
-  email        String       @unique
-  password     String
-  fullName     String
-  avatarUrl    String?
-  role         RoleName     @default(STUDENT)
-  isActive     Boolean      @default(true)
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
+  id            String         @id @default(uuid())
+  email         String         @unique
+  password      String
+  fullName      String
+  avatarUrl     String?
+  role          RoleName       @default(STUDENT)
+  plan          UserPlan       @default(FREE)
+  planExpiresAt DateTime?
+  isActive      Boolean        @default(true)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
 
-  createdExams Exam[]       @relation("CreatedExams")
-  submissions  Submission[]
-  auditLogs    AuditLog[]
+  createdExams  Exam[]         @relation("CreatedExams")
+  submissions   Submission[]
+  auditLogs     AuditLog[]
+  subscriptions Subscription[]
+  workspaces    Workspace[]
 
   @@map("users")
+}
+
+model Workspace {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  color       String?  @default("#06b6d4")
+  icon        String?  @default("FolderKanban")
+  isDefault   Boolean  @default(false)
+  userId      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exams       Exam[]
+  questions   Question[]
+
+  @@map("workspaces")
 }
 
 model Subject {
@@ -98,12 +132,14 @@ model Exam {
   subjectId       String
   gradeId         String
   createdById     String
+  workspaceId     String?
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
 
   subject         Subject      @relation(fields: [subjectId], references: [id])
   grade           Grade        @relation(fields: [gradeId], references: [id])
   createdBy       User         @relation("CreatedExams", fields: [createdById], references: [id])
+  workspace       Workspace?   @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
   questions       Question[]
   submissions     Submission[]
 
@@ -120,10 +156,12 @@ model Question {
   imageUrl    String?
   examId      String?
   subjectId   String?
+  workspaceId String?
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
 
   exam        Exam?        @relation(fields: [examId], references: [id], onDelete: Cascade)
+  workspace   Workspace?   @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
   options     Option[]
 
   @@map("questions")
@@ -155,6 +193,22 @@ model Submission {
   user        User             @relation(fields: [userId], references: [id])
 
   @@map("submissions")
+}
+
+model Subscription {
+  id            String             @id @default(uuid())
+  userId        String
+  plan          UserPlan
+  amount        Float              @default(0.0)
+  paymentMethod String             @default("QR_BANKING")
+  status        SubscriptionStatus @default(ACTIVE)
+  startedAt     DateTime           @default(now())
+  expiresAt     DateTime?
+  createdAt     DateTime           @default(now())
+
+  user          User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("subscriptions")
 }
 
 model AuditLog {

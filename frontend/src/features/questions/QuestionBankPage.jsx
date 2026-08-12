@@ -2,9 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { HelpCircle, Plus, Filter, Trash2, Edit3, CheckCircle, BookOpen } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { QuestionModal } from './QuestionModal';
+import { WordImportModal } from './WordImportModal';
+import { LaTeXRenderer } from '../../components/common/LaTeXRenderer';
+import { useWorkspace } from '../../context/WorkspaceContext';
 import api from '../../lib/axios';
 
 export const QuestionBankPage = ({ user }) => {
+  const { activeWorkspace, activeWorkspaceId } = useWorkspace();
   const [questions, setQuestions] = useState([]);
   const [subjects, setSubjects] = useState([]);
   const [exams, setExams] = useState([]);
@@ -15,6 +19,7 @@ export const QuestionBankPage = ({ user }) => {
   const [selectedType, setSelectedType] = useState('');
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isWordModalOpen, setIsWordModalOpen] = useState(false);
   const [questionToEdit, setQuestionToEdit] = useState(null);
 
   useEffect(() => {
@@ -23,7 +28,7 @@ export const QuestionBankPage = ({ user }) => {
 
   useEffect(() => {
     fetchQuestions();
-  }, [selectedSubject, selectedDifficulty, selectedType]);
+  }, [selectedSubject, selectedDifficulty, selectedType, activeWorkspaceId]);
 
   const fetchMetadata = async () => {
     try {
@@ -90,9 +95,18 @@ export const QuestionBankPage = ({ user }) => {
         </div>
 
         {(user?.role === 'TEACHER' || user?.role === 'ADMIN') && (
-          <Button variant="primary" onClick={handleOpenCreate} className="flex items-center gap-2">
-            <Plus className="w-4 h-4" /> Thêm Câu Hỏi Mới
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setIsWordModalOpen(true)}
+              className="border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/10 font-bold"
+            >
+              📄 Import Từ Word
+            </Button>
+            <Button variant="primary" onClick={handleOpenCreate} className="flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-sky-600 border-0 font-bold">
+              <Plus className="w-4 h-4" /> Thêm Câu Hỏi Mới
+            </Button>
+          </div>
         )}
       </div>
 
@@ -222,7 +236,7 @@ export const QuestionBankPage = ({ user }) => {
         </div>
       )}
 
-      {/* Modal */}
+      {/* Modals */}
       <QuestionModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -230,6 +244,12 @@ export const QuestionBankPage = ({ user }) => {
         subjects={subjects}
         exams={exams}
         onSaveSuccess={fetchQuestions}
+      />
+
+      <WordImportModal
+        isOpen={isWordModalOpen}
+        onClose={() => setIsWordModalOpen(false)}
+        onImportSuccess={() => fetchQuestions()}
       />
     </div>
   );

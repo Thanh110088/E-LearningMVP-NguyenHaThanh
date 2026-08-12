@@ -1,4 +1,5 @@
 const examRepository = require('./exam.repository');
+const auditService = require('../audit/audit.service');
 
 class ExamService {
   async getAllExams(filters) {
@@ -34,13 +35,27 @@ class ExamService {
       throw error;
     }
 
-    return examRepository.create({
+    const payload = {
       ...data,
       createdById: userId,
       durationMinutes: data.durationMinutes ? parseInt(data.durationMinutes, 10) : 45,
       totalPoints: data.totalPoints ? parseFloat(data.totalPoints) : 10.0,
       passPoints: data.passPoints ? parseFloat(data.passPoints) : 5.0,
+    };
+    if (!payload.subjectId) delete payload.subjectId;
+    if (!payload.gradeId) delete payload.gradeId;
+    if (!payload.workspaceId) delete payload.workspaceId;
+
+    const newExam = await examRepository.create(payload);
+
+    auditService.logAction({
+      userId,
+      action: 'CREATE_EXAM',
+      resource: 'Exam',
+      details: { examId: newExam.id, title: newExam.title, code: newExam.code },
     });
+
+    return newExam;
   }
 
   async updateExam(id, data, user) {
@@ -66,7 +81,16 @@ class ExamService {
     if (data.totalPoints) updatePayload.totalPoints = parseFloat(data.totalPoints);
     if (data.passPoints) updatePayload.passPoints = parseFloat(data.passPoints);
 
-    return examRepository.update(id, updatePayload);
+    const updatedExam = await examRepository.update(id, updatePayload);
+
+    auditService.logAction({
+      userId: user.id,
+      action: 'UPDATE_EXAM',
+      resource: 'Exam',
+      details: { examId: id, title: updatedExam.title, status: updatedExam.status },
+    });
+
+    return updatedExam;
   }
 
   async deleteExam(id, user) {
@@ -78,7 +102,16 @@ class ExamService {
       throw error;
     }
 
-    return examRepository.delete(id);
+    const deleted = await examRepository.delete(id);
+
+    auditService.logAction({
+      userId: user.id,
+      action: 'DELETE_EXAM',
+      resource: 'Exam',
+      details: { examId: id, title: exam.title },
+    });
+
+    return deleted;
   }
 }
 

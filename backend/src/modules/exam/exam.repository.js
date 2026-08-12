@@ -1,7 +1,7 @@
 const prisma = require('../../config/prisma');
 
 class ExamRepository {
-  async findAll({ search, subjectId, gradeId, status, createdById }) {
+  async findAll({ search, subjectId, gradeId, status, createdById, workspaceId }) {
     const where = {};
     if (search) {
       where.OR = [
@@ -13,6 +13,7 @@ class ExamRepository {
     if (gradeId) where.gradeId = gradeId;
     if (status) where.status = status;
     if (createdById) where.createdById = createdById;
+    if (workspaceId) where.workspaceId = workspaceId;
 
     return prisma.exam.findMany({
       where,

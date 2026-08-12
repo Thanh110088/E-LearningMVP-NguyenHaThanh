@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Clock, Send, AlertTriangle, CheckCircle, HelpCircle } from 'lucide-react';
+import { Clock, Send, AlertTriangle, CheckCircle, HelpCircle, ShieldAlert, Save } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
+import { LaTeXRenderer } from '../../components/common/LaTeXRenderer';
 import api from '../../lib/axios';
 
 export const TakeExamPage = ({ user }) => {
@@ -17,6 +18,25 @@ export const TakeExamPage = ({ user }) => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [tabSwitchCount, setTabSwitchCount] = useState(0);
+
+  // Anti-Cheat: Tab Switch / Visibility Detection
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        setTabSwitchCount((prev) => prev + 1);
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, []);
+
+  // LocalStorage Auto-save Draft
+  useEffect(() => {
+    if (examId && Object.keys(answers).length > 0) {
+      localStorage.setItem(`etech_draft_${examId}`, JSON.stringify(answers));
+    }
+  }, [answers, examId]);
 
   useEffect(() => {
     startExamSession();
@@ -112,8 +132,9 @@ export const TakeExamPage = ({ user }) => {
     if (submitting) return;
     setSubmitting(true);
     try {
-      const payload = { answers: formatAnswersPayload() };
+      const payload = { answers: formatAnswersPayload(), tabSwitchCount };
       const res = await api.post(`/submissions/${submission.id}/submit`, payload);
+      localStorage.removeItem(`etech_draft_${examId}`);
       navigate(`/submissions/${submission.id}/result`);
     } catch (err) {
       alert(err.response?.data?.message || 'Có lỗi xảy ra khi nộp bài');
@@ -158,10 +179,23 @@ export const TakeExamPage = ({ user }) => {
 
   return (
     <div className="max-w-7xl mx-auto pb-16 space-y-6">
+      {/* Anti-Cheat Red Warning Banner */}
+      {tabSwitchCount > 0 && (
+        <div className="bg-rose-500/10 border-2 border-rose-500 p-4 rounded-2xl flex items-center gap-3 text-rose-300 font-bold text-xs animate-pulse">
+          <ShieldAlert className="w-6 h-6 text-rose-400 shrink-0" />
+          <div>
+            <p className="text-sm font-extrabold text-rose-400">⚠️ CẢNH BÁO GIAN LẬN THI THỬ TRỰC TUYẾN!</p>
+            <p className="text-xs font-semibold text-rose-300">
+              Bạn đã rời khỏi màn hình thi hoặc chuyển tab <strong className="underline text-white font-extrabold">{tabSwitchCount} lần</strong>. Số lần vi phạm quy chế thi này sẽ được ghi nhận vào hệ thống!
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Top Bar: Exam Title & Countdown Timer */}
       <div className="sticky top-20 z-30 bg-slate-900/90 backdrop-blur-md border border-slate-800 rounded-2xl p-4 sm:p-6 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4">
         <div>
-          <span className="text-xs font-semibold uppercase tracking-wider text-indigo-400">
+          <span className="text-xs font-semibold uppercase tracking-wider text-cyan-400">
             {exam.subject?.name} • {exam.code}
           </span>
           <h1 className="text-lg sm:text-xl font-bold text-slate-100">{exam.title}</h1>
@@ -169,7 +203,7 @@ export const TakeExamPage = ({ user }) => {
 
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-2.5 px-4 py-2 rounded-xl bg-slate-800 border border-slate-700">
-            <Clock className={`w-5 h-5 ${timeLeftSeconds < 300 ? 'text-rose-400 animate-bounce' : 'text-indigo-400'}`} />
+            <Clock className={`w-5 h-5 ${timeLeftSeconds < 300 ? 'text-rose-400 animate-bounce' : 'text-cyan-400'}`} />
             <div className="text-right">
               <p className="text-[10px] uppercase font-bold text-slate-400">Thời gian còn lại</p>
               <span className={`text-lg font-mono font-extrabold ${timeLeftSeconds < 300 ? 'text-rose-400' : 'text-slate-100'}`}>
@@ -178,7 +212,7 @@ export const TakeExamPage = ({ user }) => {
             </div>
           </div>
 
-          <Button variant="primary" onClick={handleSubmitExam} loading={submitting} className="flex items-center gap-2">
+          <Button variant="primary" onClick={handleSubmitExam} loading={submitting} className="flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-sky-600 border-0 font-bold">
             <Send className="w-4 h-4" /> Nộp Bài Thi
           </Button>
         </div>
@@ -190,7 +224,7 @@ export const TakeExamPage = ({ user }) => {
           <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-6">
             {/* Question Header */}
             <div className="flex items-center justify-between pb-4 border-b border-slate-800">
-              <span className="text-sm font-bold text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-3 py-1 rounded-xl">
+              <span className="text-sm font-bold text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 px-3 py-1 rounded-xl">
                 Câu hỏi {currentQuestionIdx + 1} / {questions.length}
               </span>
               <span className="text-xs text-slate-400 font-medium">
@@ -198,10 +232,10 @@ export const TakeExamPage = ({ user }) => {
               </span>
             </div>
 
-            {/* Question Content */}
-            <p className="text-lg font-semibold text-slate-100 leading-relaxed">
-              {currentQuestion?.content}
-            </p>
+            {/* Question Content (Render với LaTeXRenderer) */}
+            <div className="text-lg font-semibold text-slate-100 leading-relaxed">
+              <LaTeXRenderer content={currentQuestion?.content} />
+            </div>
 
             {/* Options List */}
             <div className="space-y-3 pt-2">
@@ -213,16 +247,18 @@ export const TakeExamPage = ({ user }) => {
                     onClick={() => handleSelectOption(currentQuestion.id, option.id, currentQuestion.type)}
                     className={`w-full text-left p-4 rounded-xl border flex items-center gap-4 transition-all ${
                       isSelected
-                        ? 'bg-indigo-600/15 border-indigo-500 text-indigo-200 shadow-md shadow-indigo-500/10'
+                        ? 'bg-cyan-500/15 border-cyan-500 text-cyan-200 shadow-md shadow-cyan-500/10'
                         : 'bg-slate-800/40 border-slate-800 text-slate-300 hover:border-slate-700 hover:bg-slate-800/80'
                     }`}
                   >
                     <div className={`w-7 h-7 rounded-xl flex items-center justify-center text-xs font-bold shrink-0 transition-colors ${
-                      isSelected ? 'bg-indigo-500 text-white' : 'bg-slate-800 text-slate-400 border border-slate-700'
+                      isSelected ? 'bg-cyan-500 text-white' : 'bg-slate-800 text-slate-400 border border-slate-700'
                     }`}>
                       {String.fromCharCode(65 + idx)}
                     </div>
-                    <span className="text-base font-medium">{option.content}</span>
+                    <div className="text-base font-medium">
+                      <LaTeXRenderer content={option.content} />
+                    </div>
                   </button>
                 );
               })}

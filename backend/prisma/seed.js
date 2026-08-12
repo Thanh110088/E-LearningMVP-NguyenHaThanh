@@ -236,6 +236,35 @@ async function main() {
   }
 
   console.log('✅ Sample Questions & Options seeded');
+
+  // 7. Seed Sample Audit Logs
+  await prisma.auditLog.createMany({
+    data: [
+      {
+        userId: admin.id,
+        action: 'USER_LOGIN',
+        resource: 'User',
+        details: JSON.stringify({ email: 'admin@elearning.com', role: 'ADMIN' }),
+        ipAddress: '127.0.0.1',
+      },
+      {
+        userId: teacher.id,
+        action: 'CREATE_EXAM',
+        resource: 'Exam',
+        details: JSON.stringify({ title: 'Đề thi thử THPT Quốc Gia môn Toán 2026', code: 'EXAM-THPT-MATH-01' }),
+        ipAddress: '127.0.0.1',
+      },
+      {
+        userId: student.id,
+        action: 'SUBMIT_EXAM',
+        resource: 'Submission',
+        details: JSON.stringify({ score: 10, isPassed: true, tabSwitchCount: 0 }),
+        ipAddress: '127.0.0.1',
+      },
+    ],
+  });
+
+  console.log('✅ Sample Audit Logs seeded');
 }
 
 main()

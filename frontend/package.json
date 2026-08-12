@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host",
     "build": "vite build",
     "preview": "vite preview"
   },
@@ -14,11 +14,13 @@
     "axios": "^1.7.2",
     "clsx": "^2.1.1",
     "lucide-react": "^0.378.0",
+    "qrcode.react": "^4.2.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.51.4",
     "react-router-dom": "^6.23.1",
     "recharts": "^2.12.7",
+    "socket.io-client": "^4.8.3",
     "tailwind-merge": "^2.3.0",
     "zod": "^3.23.8"
   },

@@ -73,29 +73,47 @@ export const ReportsPage = ({ user }) => {
                 <th className="p-4">Mã Đề</th>
                 <th className="p-4">Điểm Số</th>
                 <th className="p-4">Kết Quả</th>
+                <th className="p-4">Vi phạm (Chuyển tab)</th>
                 <th className="p-4 text-right">Thời Gian Nộp</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60">
-              {reports.map((sub, idx) => (
-                <tr key={sub.id} className="hover:bg-slate-800/40">
-                  <td className="p-4 font-mono font-bold text-slate-500">{idx + 1}</td>
-                  <td className="p-4 font-semibold text-slate-200">{sub.user?.fullName}</td>
-                  <td className="p-4 text-slate-400">{sub.user?.email}</td>
-                  <td className="p-4 text-slate-300 font-medium">{sub.exam?.title}</td>
-                  <td className="p-4 font-mono text-indigo-400 font-bold">{sub.exam?.code}</td>
-                  <td className="p-4 font-bold text-amber-400">{sub.score} / {sub.exam?.totalPoints}</td>
-                  <td className="p-4">
-                    <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-[10px] font-bold ${
-                      sub.isPassed ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
-                    }`}>
-                      {sub.isPassed ? <CheckCircle2 className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
-                      {sub.isPassed ? 'PASSED' : 'FAILED'}
-                    </span>
-                  </td>
-                  <td className="p-4 text-right text-slate-400">{new Date(sub.submittedAt).toLocaleString()}</td>
-                </tr>
-              ))}
+              {reports.map((sub, idx) => {
+                const tabSwitchCount = sub.answersJson && typeof sub.answersJson === 'object' && !Array.isArray(sub.answersJson)
+                  ? (sub.answersJson.tabSwitchCount || 0)
+                  : 0;
+
+                return (
+                  <tr key={sub.id} className="hover:bg-slate-800/40">
+                    <td className="p-4 font-mono font-bold text-slate-500">{idx + 1}</td>
+                    <td className="p-4 font-semibold text-slate-200">{sub.user?.fullName}</td>
+                    <td className="p-4 text-slate-400">{sub.user?.email}</td>
+                    <td className="p-4 text-slate-300 font-medium">{sub.exam?.title}</td>
+                    <td className="p-4 font-mono text-cyan-400 font-bold">{sub.exam?.code}</td>
+                    <td className="p-4 font-bold text-amber-400">{sub.score} / {sub.exam?.totalPoints}</td>
+                    <td className="p-4">
+                      <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-[10px] font-bold ${
+                        sub.isPassed ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+                      }`}>
+                        {sub.isPassed ? <CheckCircle2 className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
+                        {sub.isPassed ? 'PASSED' : 'FAILED'}
+                      </span>
+                    </td>
+                    <td className="p-4">
+                      {tabSwitchCount > 0 ? (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30 animate-pulse">
+                          ⚠️ Rời tab {tabSwitchCount} lần
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                          ✓ An toàn
+                        </span>
+                      )}
+                    </td>
+                    <td className="p-4 text-right text-slate-400">{new Date(sub.submittedAt).toLocaleString()}</td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

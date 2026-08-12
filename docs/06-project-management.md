@@ -1,12 +1,13 @@
-# 06. Quản Lý Dự Án & Quyền Quản Trị (Project Management & DoD)
+# 06. Quản Lý Dự Án & DoD ETech (Project Management & DoD)
 
 ## 1. Tiêu chí hoàn thành (Definition of Done - DoD)
-- [x] Thiết kế & Cấu hình Database PostgreSQL local thành công.
-- [x] Hoàn thiện trọn vẹn 100% các API REST trong Backend.
-- [x] Xây dựng đầy đủ các màn hình Frontend giao diện hiện đại (Dark Glassmorphism).
+- [x] Tái cấu trúc giao diện thương hiệu **ETech** theo chuẩn 3 thiết kế.
+- [x] Phát triển hoàn chỉnh **Chức năng nâng cấp gói cước (Free, Pro 99k, Enterprise)**.
+- [x] Tạo màn hình **Bảng Giá & So Sánh Tính Năng (`/pricing`)**.
+- [x] Xây dựng Modal nâng cấp gói `UpgradeModal` với phương thức chuyển khoản QR Banking / MoMo.
 - [x] Chạy bộ test tích hợp backend đạt **11/11 tests PASS**.
-- [x] Chạy build sản phẩm frontend thành công không phát sinh lỗi.
-- [x] Cập nhật đầy đủ bộ tài liệu thiết kế và hướng dẫn sử dụng.
+- [x] Chạy build sản phẩm frontend ETech đạt thành công **0 errors**.
+- [x] Cập nhật bộ tài liệu thiết kế và hướng dẫn sử dụng trong thư mục `docs/`.
 
 ---
 

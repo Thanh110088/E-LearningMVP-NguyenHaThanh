@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Award, CheckCircle2, XCircle, RotateCcw, Home, CheckCircle, HelpCircle } from 'lucide-react';
+import { Award, CheckCircle2, XCircle, RotateCcw, Home, CheckCircle, HelpCircle, ShieldAlert, ShieldCheck } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
+import { LaTeXRenderer } from '../../components/common/LaTeXRenderer';
 import api from '../../lib/axios';
 
 export const ExamResultPage = ({ user }) => {
@@ -51,12 +52,24 @@ export const ExamResultPage = ({ user }) => {
   const exam = result.exam;
   const questions = exam?.questions || [];
 
-  // Parse student answers
+  // Parse student answers and tabSwitchCount
   const studentAnswersMap = {};
-  if (result.answersJson && Array.isArray(result.answersJson)) {
-    result.answersJson.forEach(item => {
-      studentAnswersMap[item.questionId] = item.selectedOptionIds || [];
-    });
+  let tabSwitchCount = 0;
+
+  if (result.answersJson) {
+    if (Array.isArray(result.answersJson)) {
+      result.answersJson.forEach(item => {
+        studentAnswersMap[item.questionId] = item.selectedOptionIds || [];
+      });
+    } else if (typeof result.answersJson === 'object') {
+      const rawAns = result.answersJson.answers || [];
+      tabSwitchCount = result.answersJson.tabSwitchCount || 0;
+      if (Array.isArray(rawAns)) {
+        rawAns.forEach(item => {
+          studentAnswersMap[item.questionId] = item.selectedOptionIds || [];
+        });
+      }
+    }
   }
 
   return (
@@ -73,7 +86,7 @@ export const ExamResultPage = ({ user }) => {
         </div>
 
         {/* Big Score Display */}
-        <div className="flex items-center justify-center gap-6">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
           <div className="flex flex-col items-center">
             <div className={`w-28 h-28 rounded-full border-4 flex items-center justify-center shadow-2xl ${
               result.isPassed
@@ -86,14 +99,28 @@ export const ExamResultPage = ({ user }) => {
           </div>
 
           <div className="text-left space-y-2">
-            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-extrabold border ${
-              result.isPassed
-                ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
-                : 'bg-rose-500/20 text-rose-300 border-rose-500/40'
-            }`}>
-              {result.isPassed ? <CheckCircle2 className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
-              {result.isPassed ? 'ĐẠT (PASSED)' : 'KHÔNG ĐẠT (FAILED)'}
-            </span>
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-extrabold border ${
+                result.isPassed
+                  ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                  : 'bg-rose-500/20 text-rose-300 border-rose-500/40'
+              }`}>
+                {result.isPassed ? <CheckCircle2 className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
+                {result.isPassed ? 'ĐẠT (PASSED)' : 'KHÔNG ĐẠT (FAILED)'}
+              </span>
+
+              {/* Anti-Cheat Violation Badge */}
+              {tabSwitchCount > 0 ? (
+                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-extrabold bg-rose-500/20 text-rose-300 border border-rose-500/40 animate-pulse">
+                  <ShieldAlert className="w-4 h-4 text-rose-400" /> Rời màn hình {tabSwitchCount} lần
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                  <ShieldCheck className="w-4 h-4 text-emerald-400" /> 0 lần vi phạm
+                </span>
+              )}
+            </div>
+
             <p className="text-xs text-slate-400">Điểm cần đạt: <strong className="text-slate-200">{exam?.passPoints} điểm</strong></p>
             <p className="text-xs text-slate-400">Thời gian nộp: <strong className="text-slate-200">{new Date(result.submittedAt).toLocaleTimeString()}</strong></p>
           </div>
