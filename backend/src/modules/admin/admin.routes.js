@@ -10,13 +10,12 @@ const router = express.Router();
 // Middleware: Tất cả các route dưới đây đều yêu cầu người dùng phải đăng nhập và có quyền ADMIN
 router.use(authenticate, authorize("ADMIN"));
 
-// TODO: Gắn các hàm xử lý từ adminController vào các route tương ứng
-router.get("/stats" /* code của bạn ở đây */);
-router.get("/users" /* code của bạn ở đây */);
-router.put("/users/:id/role" /* code của bạn ở đây */);
-router.put("/users/:id/toggle-status" /* code của bạn ở đây */);
-router.get("/teachers" /* code của bạn ở đây */);
-router.put("/teachers/:id/plan" /* code của bạn ở đây */);
-router.get("/revenue" /* code của bạn ở đây */);
+router.get("/stats", adminController.getDashboardStats);
+router.get("/users", adminController.getUsers);
+router.put("/users/:id/role", adminController.updateUserRole);
+router.put("/users/:id/toggle-status", adminController.toggleUserStatus);
+router.get("/teachers", adminController.getTeachers);
+router.put("/teachers/:id/plan", adminController.updateTeacherPlan);
+router.get("/revenue", adminController.getRevenueStats);
 
 module.exports = router;

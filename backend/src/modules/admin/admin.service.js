@@ -3,31 +3,84 @@ const auditService = require("../audit/audit.service");
 
 class AdminService {
   async getDashboardStats() {
-    // TODO: Viết logic gọi Repository để lấy thống kê tổng quan ở đây
+    return await adminRepository.getDashboardStats();
   }
 
-  async getUsers(query) {
-    // TODO: Viết logic xử lý query (search, role) và gọi Repository để lấy danh sách người dùng
+  async getUsers(query = {}) {
+    return await adminRepository.findUsers(query);
   }
 
   async updateUserRole(id, role, adminId) {
-    // TODO: Viết logic kiểm tra tính hợp lệ của role, gọi Repository để cập nhật và dùng auditService để ghi log
+    const validRoles = ["ADMIN", "TEACHER", "STUDENT"];
+    if (!role || !validRoles.includes(role)) {
+      const error = new Error("Vai trò không hợp lệ. Cho phép: ADMIN, TEACHER, STUDENT");
+      error.statusCode = 400;
+      throw error;
+    }
+
+    const updatedUser = await adminRepository.updateUserRole(id, role);
+
+    if (adminId) {
+      await auditService.logAction({
+        userId: adminId,
+        action: "UPDATE_USER_ROLE",
+        resource: "USER",
+        details: { targetUserId: id, newRole: role },
+      });
+    }
+
+    return updatedUser;
   }
 
   async toggleUserStatus(id, adminId) {
-    // TODO: Viết logic gọi Repository để khóa/mở khóa tài khoản và dùng auditService để ghi log
+    if (adminId && adminId === id) {
+      const error = new Error("Bạn không thể tự khóa tài khoản của chính mình");
+      error.statusCode = 400;
+      throw error;
+    }
+
+    const updatedUser = await adminRepository.toggleUserStatus(id);
+
+    if (adminId) {
+      await auditService.logAction({
+        userId: adminId,
+        action: "TOGGLE_USER_STATUS",
+        resource: "USER",
+        details: { targetUserId: id, isActive: updatedUser.isActive },
+      });
+    }
+
+    return updatedUser;
   }
 
   async getTeachers() {
-    // TODO: Viết logic gọi Repository để lấy danh sách giảng viên
+    return await adminRepository.findTeachers();
   }
 
   async updateTeacherPlan(id, plan, adminId) {
-    // TODO: Viết logic kiểm tra tính hợp lệ của plan, gọi Repository để cập nhật và dùng auditService để ghi log
+    const validPlans = ["FREE", "PRO", "ENTERPRISE"];
+    if (!plan || !validPlans.includes(plan)) {
+      const error = new Error("Gói dịch vụ không hợp lệ. Cho phép: FREE, PRO, ENTERPRISE");
+      error.statusCode = 400;
+      throw error;
+    }
+
+    const updatedUser = await adminRepository.updateTeacherPlan(id, plan);
+
+    if (adminId) {
+      await auditService.logAction({
+        userId: adminId,
+        action: "UPDATE_TEACHER_PLAN",
+        resource: "USER",
+        details: { targetUserId: id, newPlan: plan },
+      });
+    }
+
+    return updatedUser;
   }
 
   async getRevenueStats() {
-    // TODO: Viết logic gọi Repository để lấy thống kê doanh thu
+    return await adminRepository.getRevenueStats();
   }
 }
 
