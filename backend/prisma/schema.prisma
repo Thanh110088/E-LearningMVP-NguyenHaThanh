@@ -49,26 +49,77 @@ enum SubmissionStatus {
   EXPIRED
 }
 
+enum AuthProvider {
+  LOCAL   // đăng ký bằng email + mật khẩu
+  GOOGLE  // tài khoản tạo từ Google (password có thể null)
+}
+
+enum EmailTokenType {
+  VERIFY_EMAIL     // link kích hoạt tài khoản sau đăng ký
+  RESET_PASSWORD   // link quên mật khẩu
+}
+
 model User {
-  id            String         @id @default(uuid())
-  email         String         @unique
-  password      String
-  fullName      String
-  avatarUrl     String?
-  role          RoleName       @default(STUDENT)
-  plan          UserPlan       @default(FREE)
-  planExpiresAt DateTime?
-  isActive      Boolean        @default(true)
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+  id                String         @id @default(uuid())
+  email             String         @unique
+  password          String?        // null nếu chỉ login Google, chưa đặt mật khẩu
+  fullName          String
+  avatarUrl         String?
+  googleId          String?        @unique // "sub" Google trả về, dùng để nhận diện lần sau
+  provider          AuthProvider   @default(LOCAL)
+  emailVerified     Boolean        @default(false) // false → chưa được login password
+  emailVerifiedAt   DateTime?
+  passwordChangedAt DateTime?
+  role              RoleName       @default(STUDENT)
+  plan              UserPlan       @default(FREE)
+  planExpiresAt     DateTime?
+  isActive          Boolean        @default(true)
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
 
   createdExams  Exam[]         @relation("CreatedExams")
   submissions   Submission[]
   auditLogs     AuditLog[]
   subscriptions Subscription[]
   workspaces    Workspace[]
+  refreshTokens RefreshToken[]
+  emailTokens   EmailToken[]
 
   @@map("users")
+}
+
+// Mỗi lần login/refresh tạo 1 hàng. Logout / đổi MK đánh dấu revokedAt.
+// Chỉ lưu tokenHash, không lưu JWT gốc.
+model RefreshToken {
+  id        String    @id @default(uuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  revokedAt DateTime? // null = còn dùng được
+  userAgent String?
+  ipAddress String?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("refresh_tokens")
+}
+
+// Token trong email: user nhận raw token, DB chỉ có hash.
+model EmailToken {
+  id        String         @id @default(uuid())
+  userId    String
+  tokenHash String         @unique
+  type      EmailTokenType
+  expiresAt DateTime
+  usedAt    DateTime?      // khác null = đã dùng 1 lần, không dùng lại
+  createdAt DateTime       @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, type])
+  @@map("email_tokens")
 }
 
 model Workspace {
@@ -118,30 +169,41 @@ model Grade {
 }
 
 model Exam {
-  id              String       @id @default(uuid())
-  title           String
-  description     String?
-  code            String       @unique
-  thumbnailUrl    String?
-  durationMinutes Int          @default(45)
-  totalPoints     Float        @default(10.0)
-  passPoints      Float        @default(5.0)
-  status          ExamStatus   @default(DRAFT)
-  isLive          Boolean      @default(false)
-  pinCode         String?
-  subjectId       String
-  gradeId         String
-  createdById     String
-  workspaceId     String?
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
+  id               String       @id @default(uuid())
+  title            String
+  description      String?
+  code             String       @unique
+  thumbnailUrl     String?
+  durationMinutes  Int          @default(45)
+  totalPoints      Float        @default(10.0)
+  passPoints       Float        @default(5.0)
+  status           ExamStatus   @default(DRAFT)
+  isLive           Boolean      @default(false)
+  pinCode          String?
 
-  subject         Subject      @relation(fields: [subjectId], references: [id])
-  grade           Grade        @relation(fields: [gradeId], references: [id])
-  createdBy       User         @relation("CreatedExams", fields: [createdById], references: [id])
-  workspace       Workspace?   @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
-  questions       Question[]
-  submissions     Submission[]
+  // === PHÒNG THI CÓ KIỂM SOÁT ===
+  startTime        DateTime?    // Thời điểm mở phòng thi
+  endTime          DateTime?    // Thời điểm đóng phòng thi
+  examPassword     String?      // Mật khẩu vào phòng thi (null = không yêu cầu)
+  shuffleQuestions Boolean      @default(false) // Trộn thứ tự câu hỏi
+  shuffleOptions   Boolean      @default(false) // Trộn thứ tự đáp án
+  maxAttempts      Int          @default(1)     // Số lần thi tối đa (0 = không giới hạn)
+  showAnswerAfter  Boolean      @default(false) // Cho xem đáp án sau khi nộp bài
+  proctorEnabled   Boolean      @default(false) // Bật chế độ giám sát (fullscreen enforcement)
+
+  subjectId        String
+  gradeId          String
+  createdById      String
+  workspaceId      String?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  subject          Subject      @relation(fields: [subjectId], references: [id])
+  grade            Grade        @relation(fields: [gradeId], references: [id])
+  createdBy        User         @relation("CreatedExams", fields: [createdById], references: [id])
+  workspace        Workspace?   @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
+  questions        Question[]
+  submissions      Submission[]
 
   @@map("exams")
 }
@@ -182,12 +244,14 @@ model Submission {
   id          String           @id @default(uuid())
   examId      String
   userId      String
-  score       Float            @default(0.0)
-  isPassed    Boolean          @default(false)
-  status      SubmissionStatus @default(IN_PROGRESS)
-  startedAt   DateTime         @default(now())
-  submittedAt DateTime?
-  answersJson Json?
+  score          Float            @default(0.0)
+  isPassed       Boolean          @default(false)
+  status         SubmissionStatus @default(IN_PROGRESS)
+  startedAt      DateTime         @default(now())
+  submittedAt    DateTime?
+  answersJson    Json?
+  violations     Json?            // Mảng {type, timestamp} ghi lại vi phạm chi tiết
+  questionOrder  Json?            // Thứ tự câu hỏi sau khi trộn đề (array of questionId)
 
   exam        Exam             @relation(fields: [examId], references: [id])
   user        User             @relation(fields: [userId], references: [id])

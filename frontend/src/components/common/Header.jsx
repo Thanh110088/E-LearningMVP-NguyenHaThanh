@@ -242,8 +242,21 @@ export const Header = ({ user, onLogout }) => {
                 <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-cyan-500 to-indigo-500 flex items-center justify-center font-bold text-white text-xs shadow-inner">
                   {user.fullName ? user.fullName.charAt(0).toUpperCase() : 'U'}
                 </div>
-                <span className="text-xs font-bold text-slate-200 max-w-[120px] truncate">{user.fullName}</span>
-                <button onClick={onLogout} title="Đăng Xuất" className="text-slate-400 hover:text-rose-400 p-0.5">
+                <div className="flex items-center gap-1.5 max-w-[150px]">
+                  <Link to="/profile" className="text-xs font-bold text-slate-200 truncate hover:text-cyan-300">
+                    {user.fullName}
+                  </Link>
+                  <span className={`px-1.5 py-0.2 rounded text-[10px] font-black uppercase ${
+                    user.role === 'ADMIN'
+                      ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+                      : user.role === 'TEACHER'
+                      ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
+                      : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                  }`}>
+                    {user.role === 'ADMIN' ? 'Admin' : user.role === 'TEACHER' ? 'GV' : 'HS'}
+                  </span>
+                </div>
+                <button onClick={onLogout} title="Đăng Xuất" className="text-slate-400 hover:text-rose-400 p-0.5 ml-1 transition-colors">
                   <LogOut className="w-3.5 h-3.5" />
                 </button>
               </div>

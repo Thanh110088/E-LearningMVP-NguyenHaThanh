@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { FileText, Plus, Edit3, Trash2, CheckCircle2, Clock, Award, HelpCircle, Sparkles, Radio } from 'lucide-react';
+import { FileText, Plus, Edit3, Trash2, CheckCircle2, Clock, Award, HelpCircle, Sparkles, Radio, Monitor, Calendar, Lock } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { ExamModal } from './ExamModal';
 import { AssignQuestionModal } from './AssignQuestionModal';
 import { LiveHostDashboard } from '../live/LiveHostDashboard';
+import { ExamMonitorPage } from './ExamMonitorPage';
 import { useWorkspace } from '../../context/WorkspaceContext';
 import api from '../../lib/axios';
 
@@ -20,6 +21,7 @@ export const ExamManagePage = ({ user }) => {
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
   const [selectedAssignExam, setSelectedAssignExam] = useState(null);
   const [activeLiveExamId, setActiveLiveExamId] = useState(null);
+  const [activeMonitorExamId, setActiveMonitorExamId] = useState(null);
 
   useEffect(() => {
     fetchMetadata();
@@ -34,6 +36,15 @@ export const ExamManagePage = ({ user }) => {
       <LiveHostDashboard
         examId={activeLiveExamId}
         onBack={() => setActiveLiveExamId(null)}
+      />
+    );
+  }
+
+  if (activeMonitorExamId) {
+    return (
+      <ExamMonitorPage
+        examId={activeMonitorExamId}
+        onBack={() => setActiveMonitorExamId(null)}
       />
     );
   }
@@ -141,11 +152,10 @@ export const ExamManagePage = ({ user }) => {
 
                   <button
                     onClick={() => handleToggleStatus(exam)}
-                    className={`px-2.5 py-1 rounded-full text-xs font-semibold border shrink-0 transition-colors ${
-                      exam.status === 'PUBLISHED'
+                    className={`px-2.5 py-1 rounded-full text-xs font-semibold border shrink-0 transition-colors ${exam.status === 'PUBLISHED'
                         ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20'
                         : 'bg-amber-500/10 text-amber-400 border-amber-500/30 hover:bg-amber-500/20'
-                    }`}
+                      }`}
                   >
                     {exam.status === 'PUBLISHED' ? 'PUBLISHED' : 'DRAFT'}
                   </button>
@@ -163,6 +173,16 @@ export const ExamManagePage = ({ user }) => {
                   <div className="flex items-center gap-1.5 text-slate-400">
                     <HelpCircle className="w-4 h-4 text-violet-400" /> {exam._count?.questions || 0} câu hỏi
                   </div>
+                  {exam.examPassword && (
+                    <span className="flex items-center gap-1 text-amber-400 font-semibold">
+                      <Lock className="w-3.5 h-3.5" /> Có mật khẩu
+                    </span>
+                  )}
+                  {exam.startTime && (
+                    <span className="flex items-center gap-1 text-sky-400 font-semibold">
+                      <Calendar className="w-3.5 h-3.5" /> Có lịch thi
+                    </span>
+                  )}
                 </div>
               </div>
 
@@ -177,6 +197,12 @@ export const ExamManagePage = ({ user }) => {
                     className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-rose-600 via-purple-600 to-indigo-600 hover:from-rose-500 hover:to-indigo-500 text-white text-xs font-black shadow-lg shadow-rose-600/20 flex items-center gap-1.5 transition transform active:scale-95"
                   >
                     <Radio className="w-3.5 h-3.5 animate-pulse" /> Thi Live
+                  </button>
+                  <button
+                    onClick={() => setActiveMonitorExamId(exam.id)}
+                    className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 hover:border-slate-600 text-slate-300 text-xs font-bold flex items-center gap-1.5 transition"
+                  >
+                    <Monitor className="w-3.5 h-3.5 text-emerald-400" /> Giám Sát
                   </button>
                   <Button variant="primary" size="sm" onClick={() => handleOpenAssign(exam)} className="text-xs font-bold px-2.5 py-1">
                     <Sparkles className="w-3.5 h-3.5 mr-1" /> Gán Câu Hỏi

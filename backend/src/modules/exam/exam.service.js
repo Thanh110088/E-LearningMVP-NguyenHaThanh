@@ -35,12 +35,28 @@ class ExamService {
       throw error;
     }
 
+    const parseBool = (val) => val === true || val === 'true';
+    // parseDate: an toàn, reject null/empty/Invalid Date
+    const parseDate = (v) => {
+      if (!v || v === 'null') return null;
+      const d = new Date(v);
+      return isNaN(d.getTime()) ? null : d;
+    };
+
     const payload = {
       ...data,
       createdById: userId,
       durationMinutes: data.durationMinutes ? parseInt(data.durationMinutes, 10) : 45,
       totalPoints: data.totalPoints ? parseFloat(data.totalPoints) : 10.0,
       passPoints: data.passPoints ? parseFloat(data.passPoints) : 5.0,
+      maxAttempts: data.maxAttempts !== undefined ? parseInt(data.maxAttempts, 10) : 1,
+      shuffleQuestions: parseBool(data.shuffleQuestions),
+      shuffleOptions: parseBool(data.shuffleOptions),
+      showAnswerAfter: parseBool(data.showAnswerAfter),
+      proctorEnabled: parseBool(data.proctorEnabled),
+      startTime: parseDate(data.startTime),
+      endTime: parseDate(data.endTime),
+      examPassword: data.examPassword?.trim() || null,
     };
     if (!payload.subjectId) delete payload.subjectId;
     if (!payload.gradeId) delete payload.gradeId;
@@ -76,10 +92,24 @@ class ExamService {
       }
     }
 
+    const parseBool = (val) => val === true || val === 'true';
+    const parseDate = (v) => {
+      if (!v || v === 'null') return null;
+      const d = new Date(v);
+      return isNaN(d.getTime()) ? null : d;
+    };
     const updatePayload = { ...data };
     if (data.durationMinutes) updatePayload.durationMinutes = parseInt(data.durationMinutes, 10);
     if (data.totalPoints) updatePayload.totalPoints = parseFloat(data.totalPoints);
     if (data.passPoints) updatePayload.passPoints = parseFloat(data.passPoints);
+    if (data.maxAttempts !== undefined) updatePayload.maxAttempts = parseInt(data.maxAttempts, 10);
+    if (data.shuffleQuestions !== undefined) updatePayload.shuffleQuestions = parseBool(data.shuffleQuestions);
+    if (data.shuffleOptions !== undefined) updatePayload.shuffleOptions = parseBool(data.shuffleOptions);
+    if (data.showAnswerAfter !== undefined) updatePayload.showAnswerAfter = parseBool(data.showAnswerAfter);
+    if (data.proctorEnabled !== undefined) updatePayload.proctorEnabled = parseBool(data.proctorEnabled);
+    if (data.startTime !== undefined) updatePayload.startTime = parseDate(data.startTime);
+    if (data.endTime !== undefined) updatePayload.endTime = parseDate(data.endTime);
+    if (data.examPassword !== undefined) updatePayload.examPassword = data.examPassword?.trim() || null;
 
     const updatedExam = await examRepository.update(id, updatePayload);
 

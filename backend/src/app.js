@@ -1,8 +1,14 @@
+/**
+ * Điểm vào Express: thứ tự middleware RẤT QUAN TRỌNG.
+ * Request đi từ trên xuống: CORS → cookieParser → JSON → routes → 404 → errorHandler
+ */
 const express = require('express');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 const swaggerUi = require('swagger-ui-express');
 const config = require('./config');
 const errorHandler = require('./middlewares/error.middleware');
+const notFoundHandler = require('./middlewares/notFound.middleware');
 
 // Routes
 const authRoutes = require('./modules/auth/auth.routes');
@@ -22,34 +28,33 @@ const workspaceRoutes = require('./modules/workspace/workspace.routes');
 
 const app = express();
 
-// Middlewares
+app.set('trust proxy', 1); // tin header X-Forwarded-* khi đứng sau nginx / reverse proxy
+
+// credentials: true = cho phép trình duyệt gửi cookie cross-origin (5173 → 5050)
 app.use(cors({ origin: config.corsOrigin, credentials: true }));
+app.use(cookieParser()); // biến header Cookie thành req.cookies
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Root welcome route
 app.get('/', (req, res) => {
   res.status(200).json({ status: 'OK', message: 'E-Learning & Quiz System API is running', docs: '/api-docs' });
 });
 
-// Healthcheck
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'OK', message: 'E-Learning API is operational', timestamp: new Date() });
 });
 
-// Swagger Specs
 const swaggerDocument = {
   openapi: '3.0.0',
   info: {
     title: 'E-Learning & Quiz System API',
-    version: '1.0.0',
-    description: 'REST API documentation for E-Learning & Quiz System Production-Ready MVP'
+    version: '1.1.0',
+    description: 'REST API documentation for E-Learning & Quiz System — Auth cookie-based (password, Google, email verification)'
   },
   servers: [{ url: `http://localhost:${config.port}/api/v1` }]
 };
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-// API Routes
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/categories', categoryRoutes);
 app.use('/api/v1/catalog', catalogRoutes);
@@ -66,7 +71,7 @@ app.use('/api/v1/admin', adminRoutes);
 app.use('/api/v1/workspaces', workspaceRoutes);
 app.use('/api/workspaces', workspaceRoutes);
 
-// Global Error Handler
-app.use(errorHandler);
+app.use(notFoundHandler); // không khớp route nào
+app.use(errorHandler);    // phải đứng cuối, 4 tham số (err, req, res, next)
 
 module.exports = app;

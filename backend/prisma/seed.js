@@ -14,34 +14,40 @@ async function main() {
   // 2. Users
   const admin = await prisma.user.upsert({
     where: { email: 'admin@elearning.com' },
-    update: {},
+    update: { emailVerified: true, emailVerifiedAt: new Date() },
     create: {
       email: 'admin@elearning.com',
       password: adminPassword,
       fullName: 'Hệ Thống Admin',
       role: 'ADMIN',
+      emailVerified: true,
+      emailVerifiedAt: new Date(),
     },
   });
 
   const teacher = await prisma.user.upsert({
     where: { email: 'teacher@elearning.com' },
-    update: {},
+    update: { emailVerified: true, emailVerifiedAt: new Date() },
     create: {
       email: 'teacher@elearning.com',
       password: teacherPassword,
       fullName: 'Thầy Nguyễn Văn A',
       role: 'TEACHER',
+      emailVerified: true,
+      emailVerifiedAt: new Date(),
     },
   });
 
   const student = await prisma.user.upsert({
     where: { email: 'student@elearning.com' },
-    update: {},
+    update: { emailVerified: true, emailVerifiedAt: new Date() },
     create: {
       email: 'student@elearning.com',
       password: studentPassword,
       fullName: 'Em Trần Thị B',
       role: 'STUDENT',
+      emailVerified: true,
+      emailVerifiedAt: new Date(),
     },
   });
 

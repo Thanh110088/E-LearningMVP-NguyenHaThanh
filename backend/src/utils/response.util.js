@@ -1,3 +1,8 @@
+/**
+ * Chuẩn hóa JSON trả về client.
+ * Mọi API thành công: { success: true, message, data, meta? }
+ * Lỗi thường đi qua error.middleware, không cần gọi sendError ở controller nữa.
+ */
 const sendSuccess = (res, message, data = null, statusCode = 200, meta = null) => {
   const response = {
     success: true,

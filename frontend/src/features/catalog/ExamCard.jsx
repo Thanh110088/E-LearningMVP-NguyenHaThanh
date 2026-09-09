@@ -22,11 +22,6 @@ export const ExamCard = ({ exam, user }) => {
             <Badge variant="primary">{exam.subject?.name || 'Môn học'}</Badge>
             <Badge variant="neutral">{exam.grade?.name || 'Khối lớp'}</Badge>
           </div>
-          {exam.isLive && (
-            <Badge variant="danger" className="animate-pulse">
-              LIVE
-            </Badge>
-          )}
         </div>
       </div>
 
@@ -61,14 +56,10 @@ export const ExamCard = ({ exam, user }) => {
 
         {/* Action Button Personalized */}
         <Link
-          to={isTeacherOrAdmin ? '/manage-exams' : `/exams/${exam.id}`}
-          className={`w-full mt-2 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border text-xs font-bold transition-all group/btn ${
-            isTeacherOrAdmin
-              ? 'bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700'
-              : 'bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border-cyan-500/40'
-          }`}
+          to={`/exams/${exam.id}`}
+          className="w-full mt-2 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border text-xs font-bold transition-all bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border-cyan-500/40 group/btn"
         >
-          <span>{isTeacherOrAdmin ? 'Quản Lý Đề Thi' : 'Vào Thi Ngay'}</span>
+          <span>Vào Xem Đề / Thi</span>
           <ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-1 transition-transform" />
         </Link>
       </div>

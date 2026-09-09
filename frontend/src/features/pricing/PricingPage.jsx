@@ -65,7 +65,7 @@ export const PricingPage = ({ user, onUserUpdate }) => {
               <div className="flex items-center gap-2 text-cyan-400"><Check className="w-4 h-4 shrink-0" /> 10 đề thi</div>
               <div className="flex items-center gap-2 text-cyan-400"><Check className="w-4 h-4 shrink-0" /> 200 câu hỏi</div>
               <div className="flex items-center gap-2 text-cyan-400"><Check className="w-4 h-4 shrink-0" /> 1 workspace</div>
-              <div className="flex items-center gap-2 text-cyan-400"><Check className="w-4 h-4 shrink-0" /> Phòng live tối đa 30 học sinh</div>
+              <div className="flex items-center gap-2 text-cyan-400"><Check className="w-4 h-4 shrink-0" /> Giám sát thi trực tuyến tối đa 30 thí sinh</div>
               <div className="flex items-center gap-2 text-cyan-400"><Check className="w-4 h-4 shrink-0" /> Import đề từ Word</div>
               <div className="flex items-center gap-2 text-cyan-400"><Check className="w-4 h-4 shrink-0" /> Xuất điểm Excel</div>
               <div className="flex items-center gap-2 text-cyan-400"><Check className="w-4 h-4 shrink-0" /> Báo cáo cơ bản</div>
@@ -105,7 +105,7 @@ export const PricingPage = ({ user, onUserUpdate }) => {
               <div className="flex items-center gap-2 text-cyan-400 font-bold"><Check className="w-4 h-4 shrink-0" /> 100 đề thi</div>
               <div className="flex items-center gap-2 text-cyan-400 font-bold"><Check className="w-4 h-4 shrink-0" /> 5.000 câu hỏi</div>
               <div className="flex items-center gap-2 text-cyan-400 font-bold"><Check className="w-4 h-4 shrink-0" /> 5 workspace</div>
-              <div className="flex items-center gap-2 text-cyan-400 font-bold"><Check className="w-4 h-4 shrink-0" /> Phòng live tối đa 100 học sinh</div>
+              <div className="flex items-center gap-2 text-cyan-400 font-bold"><Check className="w-4 h-4 shrink-0" /> Giám sát thi trực tuyến tối đa 100 thí sinh</div>
               <div className="flex items-center gap-2 text-cyan-400"><Check className="w-4 h-4 shrink-0" /> Import đề từ Word</div>
               <div className="flex items-center gap-2 text-cyan-400"><Check className="w-4 h-4 shrink-0" /> Xuất điểm Excel</div>
               <div className="flex items-center gap-2 text-cyan-400"><Check className="w-4 h-4 shrink-0" /> Báo cáo & phân tích nâng cao</div>
@@ -141,7 +141,7 @@ export const PricingPage = ({ user, onUserUpdate }) => {
               <div className="flex items-center gap-2 text-cyan-400"><Check className="w-4 h-4 shrink-0" /> Không giới hạn đề thi</div>
               <div className="flex items-center gap-2 text-cyan-400"><Check className="w-4 h-4 shrink-0" /> Không giới hạn câu hỏi</div>
               <div className="flex items-center gap-2 text-cyan-400"><Check className="w-4 h-4 shrink-0" /> Không giới hạn workspace</div>
-              <div className="flex items-center gap-2 text-cyan-400"><Check className="w-4 h-4 shrink-0" /> Phòng live tối đa 500 học sinh</div>
+              <div className="flex items-center gap-2 text-cyan-400"><Check className="w-4 h-4 shrink-0" /> Giám sát thi trực tuyến tối đa 500 thí sinh</div>
               <div className="flex items-center gap-2 text-cyan-400"><Check className="w-4 h-4 shrink-0" /> Import đề từ Word</div>
               <div className="flex items-center gap-2 text-cyan-400"><Check className="w-4 h-4 shrink-0" /> Xuất điểm Excel</div>
               <div className="flex items-center gap-2 text-cyan-400"><Check className="w-4 h-4 shrink-0" /> Báo cáo & phân tích nâng cao</div>
@@ -198,7 +198,7 @@ export const PricingPage = ({ user, onUserUpdate }) => {
                 <td className="py-3.5 text-center">Không giới hạn</td>
               </tr>
               <tr>
-                <td className="py-3.5 font-bold">Phòng thi live</td>
+                <td className="py-3.5 font-bold">Thí sinh thi trực tuyến</td>
                 <td className="py-3.5 text-center">30 HS</td>
                 <td className="py-3.5 text-center font-bold text-cyan-400">100 HS</td>
                 <td className="py-3.5 text-center">500 HS</td>

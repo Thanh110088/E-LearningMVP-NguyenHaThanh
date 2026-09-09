@@ -4,6 +4,16 @@ Tài liệu này hướng dẫn chi tiết từng bước sử dụng toàn bộ
 
 ---
 
+## 0. Tài khoản & bảo mật
+
+- Đăng ký bằng email: hệ thống gửi thư xác nhận. Chưa xác nhận thì không đăng nhập được.
+- Quên mật khẩu: `/forgot-password` → mở link trong email → đặt mật khẩu mới.
+- Đổi mật khẩu khi đã đăng nhập: click tên trên header → `/profile`. Mọi lần đổi/reset đều có email cảnh báo.
+- Đăng nhập Google: hiện nút khi đã cấu hình `VITE_GOOGLE_CLIENT_ID`.
+- Phiên đăng nhập dùng cookie httpOnly, không lưu token trên trình duyệt.
+
+---
+
 ## I. Chi Tiết 6 Tính Năng Cốt Lõi ETech
 
 ### 1. ⚡ Dễ Dùng Cho Giáo Viên (Import từ Word `.docx`)

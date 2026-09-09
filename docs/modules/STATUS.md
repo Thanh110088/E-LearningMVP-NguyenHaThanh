@@ -2,7 +2,7 @@
 
 | Module | Trạng thái | Ghi chú / Chi tiết |
 | :--- | :---: | :--- |
-| **Auth Module** | ✅ 100% | Đăng ký, đăng nhập JWT, `/me`, mã hóa mật khẩu bcrypt, phân quyền vai trò. |
+| **Auth Module** | ✅ 100% | Cookie httpOnly (access + refresh rotation), password + Google, xác nhận email (đăng ký / quên MK / đổi MK), handleAsync, validBodyRequest + Zod. |
 | **Role Restriction Engine** | ✅ 100% | Chặn Giáo viên và Admin làm bài thi (dành riêng cho Học sinh). |
 | **Category Module** | ✅ 100% | CRUD Môn học và Khối lớp (THPT, THCS, TIỂU HỌC). |
 | **Catalog Module** | ✅ 100% | Thư viện đề thi 3 cột, bộ lọc môn học/lớp, tìm kiếm & Top 5 phổ biến. |

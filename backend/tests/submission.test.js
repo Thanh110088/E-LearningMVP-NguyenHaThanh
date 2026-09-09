@@ -1,30 +1,22 @@
-const request = require('supertest');
-const app = require('../src/app');
 const prisma = require('../src/config/prisma');
+const { loginAgent } = require('./helpers/auth');
 
 describe('Submission & Exam Engine Integration Tests', () => {
-  let token = '';
+  let agent;
   let examId = '';
   let questionId = '';
   let correctOptionId = '';
   let submissionId = '';
 
   beforeAll(async () => {
-    // 1. Get or create test user token
-    const loginRes = await request(app)
-      .post('/api/v1/auth/login')
-      .send({
-        email: 'student@elearning.com',
-        password: 'Student123456',
-      });
-
-    if (loginRes.statusCode === 200) {
-      token = loginRes.body.data.token;
+    const login = await loginAgent('student@elearning.com', 'Student123456');
+    agent = login.agent;
+    if (login.res.statusCode !== 200) {
+      throw new Error(`Student login failed: ${login.res.body?.message || login.res.statusCode}`);
     }
 
-    // 2. Get published exam
     const exam = await prisma.exam.findFirst({
-      where: { status: 'PUBLISHED' },
+      where: { status: 'PUBLISHED', questions: { some: {} } },
       include: { questions: { include: { options: true } } },
     });
 
@@ -32,7 +24,7 @@ describe('Submission & Exam Engine Integration Tests', () => {
       examId = exam.id;
       if (exam.questions && exam.questions.length > 0) {
         questionId = exam.questions[0].id;
-        const correctOpt = exam.questions[0].options.find(o => o.isCorrect);
+        const correctOpt = exam.questions[0].options.find((o) => o.isCorrect);
         if (correctOpt) {
           correctOptionId = correctOpt.id;
         }
@@ -48,11 +40,9 @@ describe('Submission & Exam Engine Integration Tests', () => {
   });
 
   it('POST /api/v1/submissions/start/:examId - Bắt đầu làm bài thi', async () => {
-    if (!token || !examId) return;
+    if (!examId) return;
 
-    const res = await request(app)
-      .post(`/api/v1/submissions/start/${examId}`)
-      .set('Authorization', `Bearer ${token}`);
+    const res = await agent.post(`/api/v1/submissions/start/${examId}`).send({});
 
     expect(res.statusCode).toBe(200);
     expect(res.body.success).toBe(true);
@@ -61,7 +51,7 @@ describe('Submission & Exam Engine Integration Tests', () => {
   });
 
   it('POST /api/v1/submissions/:id/submit - Nộp bài và chấm điểm tự động', async () => {
-    if (!token || !submissionId) return;
+    if (!submissionId) return;
 
     const answers = [
       {
@@ -70,10 +60,7 @@ describe('Submission & Exam Engine Integration Tests', () => {
       },
     ];
 
-    const res = await request(app)
-      .post(`/api/v1/submissions/${submissionId}/submit`)
-      .set('Authorization', `Bearer ${token}`)
-      .send({ answers });
+    const res = await agent.post(`/api/v1/submissions/${submissionId}/submit`).send({ answers });
 
     expect(res.statusCode).toBe(200);
     expect(res.body.success).toBe(true);
@@ -83,11 +70,9 @@ describe('Submission & Exam Engine Integration Tests', () => {
   });
 
   it('GET /api/v1/submissions/:id/result - Lấy chi tiết kết quả bài làm', async () => {
-    if (!token || !submissionId) return;
+    if (!submissionId) return;
 
-    const res = await request(app)
-      .get(`/api/v1/submissions/${submissionId}/result`)
-      .set('Authorization', `Bearer ${token}`);
+    const res = await agent.get(`/api/v1/submissions/${submissionId}/result`);
 
     expect(res.statusCode).toBe(200);
     expect(res.body.success).toBe(true);

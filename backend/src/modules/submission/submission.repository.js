@@ -46,6 +46,7 @@ class SubmissionRepository {
                 points: true,
                 difficulty: true,
                 imageUrl: true,
+                explanation: true,
                 options: {
                   select: {
                     id: true,

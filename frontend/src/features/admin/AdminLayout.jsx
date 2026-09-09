@@ -1,18 +1,28 @@
-import React from 'react';
-import { Link, useLocation, useNavigate, Outlet } from 'react-router-dom';
-import { LayoutDashboard, Users, GraduationCap, BookOpen, DollarSign, Settings, Atom, LogOut, ShieldCheck } from 'lucide-react';
+import React from "react";
+import { Link, useLocation, useNavigate, Outlet } from "react-router-dom";
+import {
+  LayoutDashboard,
+  Users,
+  GraduationCap,
+  BookOpen,
+  DollarSign,
+  Settings,
+  Atom,
+  LogOut,
+  ShieldCheck,
+} from "lucide-react";
 
 export const AdminLayout = ({ user, onLogout }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
   const navItems = [
-    { path: '/admin/dashboard', label: 'Tổng quan', icon: LayoutDashboard },
-    { path: '/admin/users', label: 'Người dùng', icon: Users },
-    { path: '/admin/teachers', label: 'Giảng viên', icon: GraduationCap },
-    { path: '/admin/subjects', label: 'Môn học', icon: BookOpen },
-    { path: '/admin/revenue', label: 'Doanh thu', icon: DollarSign },
-    { path: '/admin/settings', label: 'Cài đặt', icon: Settings },
+    { path: "/admin/dashboard", label: "Tổng quan", icon: LayoutDashboard },
+    { path: "/admin/users", label: "Người dùng", icon: Users },
+    { path: "/admin/teachers", label: "Giảng viên", icon: GraduationCap },
+    { path: "/admin/subjects", label: "Môn học", icon: BookOpen },
+    { path: "/admin/revenue", label: "Doanh thu", icon: DollarSign },
+    { path: "/admin/settings", label: "Cài đặt", icon: Settings },
   ];
 
   return (
@@ -26,8 +36,12 @@ export const AdminLayout = ({ user, onLogout }) => {
               <Atom className="w-6 h-6 animate-spin-slow" />
             </div>
             <div>
-              <h2 className="text-lg font-black text-slate-900 tracking-tight">ETech Admin</h2>
-              <span className="text-[10px] font-bold text-cyan-600 uppercase tracking-widest block">SUPER ADMIN</span>
+              <h2 className="text-lg font-black text-slate-900 tracking-tight">
+                ETech Admin
+              </h2>
+              <span className="text-[10px] font-bold text-cyan-600 uppercase tracking-widest block">
+                SUPER ADMIN
+              </span>
             </div>
           </Link>
 
@@ -42,11 +56,13 @@ export const AdminLayout = ({ user, onLogout }) => {
                   to={item.path}
                   className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-bold transition-all ${
                     active
-                      ? 'bg-cyan-50 text-cyan-600 shadow-sm border border-cyan-200/60'
-                      : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900'
+                      ? "bg-cyan-50 text-cyan-600 shadow-sm border border-cyan-200/60"
+                      : "text-slate-500 hover:bg-slate-100 hover:text-slate-900"
                   }`}
                 >
-                  <Icon className={`w-4 h-4 ${active ? 'text-cyan-600' : 'text-slate-400'}`} />
+                  <Icon
+                    className={`w-4 h-4 ${active ? "text-cyan-600" : "text-slate-400"}`}
+                  />
                   <span>{item.label}</span>
                 </Link>
               );
@@ -64,15 +80,23 @@ export const AdminLayout = ({ user, onLogout }) => {
           <div className="flex items-center justify-between p-2.5 rounded-2xl bg-slate-50 border border-slate-200/80">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-xs">
-                {user?.fullName ? user.fullName.charAt(0) : 'A'}
+                {user?.fullName ? user.fullName.charAt(0) : "A"}
               </div>
               <div className="flex flex-col">
-                <span className="text-xs font-bold text-slate-800 line-clamp-1">{user?.fullName || 'Super Admin'}</span>
-                <span className="text-[10px] text-slate-400 font-semibold">Super Admin</span>
+                <span className="text-xs font-bold text-slate-800 line-clamp-1">
+                  {user?.fullName || "Super Admin"}
+                </span>
+                <span className="text-[10px] text-slate-400 font-semibold">
+                  Super Admin
+                </span>
               </div>
             </div>
 
-            <button onClick={onLogout} title="Đăng xuất" className="text-slate-400 hover:text-rose-500 p-1">
+            <button
+              onClick={onLogout}
+              title="Đăng xuất"
+              className="text-slate-400 hover:text-rose-500 p-1"
+            >
               <LogOut className="w-4 h-4" />
             </button>
           </div>

@@ -1,8 +1,8 @@
 # 02. Danh Sách Epics & Tính Năng ETech (Epics & Features)
 
-## Danh sách các Epics chính
-
-### 1. Epic 1: ETech Core & SaaS Subscriptions (Tái cấu trúc UI & Nâng cấp gói)
+### 1. Epic 0: Auth Base (Password, Google, Email)
+- **FE-0.1**: Login/Register cookie-based, Google Identity Services, quên/đặt lại mật khẩu, xác nhận email, đổi mật khẩu (`/profile`).
+- **BE-0.1**: Cookie httpOnly access/refresh, email verify/reset/change-notify, Google ID token, handleAsync, validBodyRequest + Zod, error handler tập trung.
 - **FE-1.1**: Header ETech đa kênh (`Trang chủ`, `Khám phá`, `Bảng giá`, `Live PIN`, User Plan Pill).
 - **FE-1.2**: Trang chủ Home Page (Hero section, 3 nút hành động, 6 thẻ tính năng).
 - **FE-1.3**: Trang Bảng giá Pricing Page (3 gói cước Free, Pro 99k, Enterprise + Bảng so sánh).

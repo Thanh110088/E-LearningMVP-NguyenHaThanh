@@ -1,5 +1,4 @@
 const prisma = require('../src/config/prisma');
-const liveService = require('../src/modules/live/live.service');
 const submissionService = require('../src/modules/submission/submission.service');
 
 async function testFlow() {
@@ -22,11 +21,7 @@ async function testFlow() {
 
   console.log('Found Published Exam:', exam.title, '| Code:', exam.code, '| ID:', exam.id, '| Questions:', exam._count.questions);
 
-  // 3. Test Join Live PIN
-  const liveResult = await liveService.joinLiveRoom(exam.code);
-  console.log('✅ Live Join Success for PIN/Code:', liveResult.code);
-
-  // 4. Test Start Exam Session
+  // 3. Test Start Exam Session
   const subResult = await submissionService.startExam(exam.id, student.id);
   console.log('✅ Start Exam Session Success! Submission ID:', subResult.id, '| Status:', subResult.status);
 

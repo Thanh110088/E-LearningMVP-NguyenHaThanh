@@ -10,3 +10,6 @@ Mục lục toàn bộ bộ tài liệu thiết kế kiến trúc, lộ trình p
 6. [06. Quản Lý Dự Án & Tiêu Chuẩn DoD (06-project-management.md)](./06-project-management.md)
 7. [07. Hướng Dẫn Sử Dụng Chi Tiết & Nâng Cấp Gói (07-user-guide.md)](./07-user-guide.md)
 8. [Tiến Độ Chi Tiết Các Module (modules/STATUS.md)](./modules/STATUS.md)
+9. [08. Auth Base Cookie / Google / Email (08-auth-base.md)](./08-auth-base.md)
+10. [Báo cáo nâng cấp Auth-Base (BAO_CAO_AUTH_BASE.md)](./BAO_CAO_AUTH_BASE.md)
+11. [09. Giải thích code Auth cho người mới (09-giai-thich-code-auth.md)](./09-giai-thich-code-auth.md)

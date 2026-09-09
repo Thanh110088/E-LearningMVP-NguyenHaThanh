@@ -176,11 +176,10 @@ export const QuestionBankPage = ({ user }) => {
                       <span className="text-[11px] font-semibold px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">
                         {q.type}
                       </span>
-                      <span className={`text-[11px] font-semibold px-2 py-0.5 rounded ${
-                        q.difficulty === 'EASY' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
-                        q.difficulty === 'MEDIUM' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' :
-                        'bg-rose-500/10 text-rose-400 border border-rose-500/20'
-                      }`}>
+                      <span className={`text-[11px] font-semibold px-2 py-0.5 rounded ${q.difficulty === 'EASY' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
+                          q.difficulty === 'MEDIUM' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' :
+                            'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+                        }`}>
                         {q.difficulty}
                       </span>
                       <span className="text-xs text-slate-400 font-medium">({q.points} điểm)</span>
@@ -211,11 +210,10 @@ export const QuestionBankPage = ({ user }) => {
                 {q.options?.map((opt, i) => (
                   <div
                     key={opt.id}
-                    className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm ${
-                      opt.isCorrect
+                    className={`flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm ${opt.isCorrect
                         ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 font-medium'
                         : 'bg-slate-800/40 border border-slate-800 text-slate-400'
-                    }`}
+                      }`}
                   >
                     <span className="w-5 h-5 rounded-full bg-slate-800 text-xs font-bold flex items-center justify-center shrink-0">
                       {String.fromCharCode(65 + i)}

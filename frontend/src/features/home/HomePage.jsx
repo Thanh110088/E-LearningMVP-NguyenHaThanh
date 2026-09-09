@@ -189,7 +189,7 @@ export const HomePage = ({ user }) => {
                 <GraduationCap className="w-4 h-4" /> WORKSPACE GIÁO VIÊN ETECH
               </div>
               <h1 className="text-3xl font-black text-white">Xin chào, Thầy/Cô {user.fullName}!</h1>
-              <p className="text-sm text-slate-300 mt-1 font-medium">Quản lý đề thi, ngân hàng câu hỏi, phát đề live và theo dõi báo cáo điểm số của học sinh.</p>
+              <p className="text-sm text-slate-300 mt-1 font-medium">Quản lý đề thi, ngân hàng câu hỏi, giám sát trực tuyến và theo dõi báo cáo điểm số của học sinh.</p>
             </div>
 
             <Button
@@ -307,6 +307,15 @@ export const HomePage = ({ user }) => {
             className="rounded-full border-slate-700 hover:border-rose-500/50 hover:bg-slate-800 text-slate-200 font-bold px-6 py-3 flex items-center gap-2"
           >
             <Radio className="w-4 h-4 text-rose-400 animate-pulse" /> Vào thi bằng mã PIN
+          </Button>
+
+          <Button
+            variant="outline"
+            size="lg"
+            onClick={() => navigate('/leaderboard')}
+            className="rounded-full border-slate-700 hover:border-cyan-500/50 hover:bg-slate-800 text-slate-200 font-bold px-6 py-3 flex items-center gap-2"
+          >
+            <Trophy className="w-4 h-4 text-amber-400" /> Bảng xếp hạng
           </Button>
 
           <Button

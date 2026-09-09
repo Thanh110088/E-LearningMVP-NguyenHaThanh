@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Award, CheckCircle2, XCircle, RotateCcw, Home, CheckCircle, HelpCircle, ShieldAlert, ShieldCheck } from 'lucide-react';
+import { Award, CheckCircle2, XCircle, RotateCcw, Home, CheckCircle, HelpCircle, ShieldAlert, ShieldCheck, Lock } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { LaTeXRenderer } from '../../components/common/LaTeXRenderer';
 import api from '../../lib/axios';
@@ -143,95 +143,108 @@ export const ExamResultPage = ({ user }) => {
           <HelpCircle className="w-5 h-5 text-indigo-400" /> Chi Tiết Bài Làm & Lời Giải
         </h3>
 
-        <div className="space-y-6">
-          {questions.map((q, qIndex) => {
-            const studentSelected = studentAnswersMap[q.id] || [];
-            const correctOptionIds = q.options?.filter(o => o.isCorrect).map(o => o.id) || [];
-            
-            let isUserCorrect = false;
-            if (q.type === 'SINGLE_CHOICE' || q.type === 'TRUE_FALSE') {
-              isUserCorrect = studentSelected.length === 1 && correctOptionIds.includes(studentSelected[0]);
-            } else if (q.type === 'MULTIPLE_CHOICE') {
-              const selSorted = [...studentSelected].sort().join(',');
-              const corSorted = [...correctOptionIds].sort().join(',');
-              isUserCorrect = selSorted === corSorted && selSorted !== '';
-            }
+        {!exam?.showAnswerAfter && questions[0]?.options?.every(o => o.isCorrect === undefined) ? (
+          <div className="bg-slate-900 border border-slate-800 p-8 rounded-2xl text-center space-y-3">
+            <Lock className="w-10 h-10 text-slate-500 mx-auto" />
+            <h4 className="text-base font-bold text-slate-300">Không hiển thị đáp án chi tiết</h4>
+            <p className="text-xs text-slate-400 max-w-md mx-auto">
+              Giáo viên đã cấu hình ẩn đáp án chi tiết của đề thi này để bảo mật đề thi. Kết quả tổng điểm của bạn đã được ghi nhận vào hệ thống.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {questions.map((q, qIndex) => {
+              const studentSelected = studentAnswersMap[q.id] || [];
+              const correctOptionIds = q.options?.filter(o => o.isCorrect).map(o => o.id) || [];
+              
+              let isUserCorrect = false;
+              if (q.type === 'SINGLE_CHOICE' || q.type === 'TRUE_FALSE') {
+                isUserCorrect = studentSelected.length === 1 && correctOptionIds.includes(studentSelected[0]);
+              } else if (q.type === 'MULTIPLE_CHOICE') {
+                const selSorted = [...studentSelected].sort().join(',');
+                const corSorted = [...correctOptionIds].sort().join(',');
+                isUserCorrect = selSorted === corSorted && selSorted !== '';
+              }
 
-            return (
-              <div
-                key={q.id}
-                className={`bg-slate-900 border rounded-2xl p-6 space-y-4 ${
-                  isUserCorrect ? 'border-slate-800' : 'border-rose-500/20'
-                }`}
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex items-start gap-3">
-                    <span className={`w-7 h-7 rounded-lg text-xs font-bold flex items-center justify-center shrink-0 mt-0.5 ${
-                      isUserCorrect
-                        ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                        : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
-                    }`}>
-                      Q{qIndex + 1}
-                    </span>
-                    <div>
-                      <p className="text-slate-100 font-semibold text-base leading-snug">{q.content}</p>
-                      <span className="text-xs text-slate-400 mt-1 block">({q.points} điểm)</span>
-                    </div>
-                  </div>
-
-                  <span className={`px-2.5 py-1 rounded-full text-xs font-semibold shrink-0 ${
-                    isUserCorrect
-                      ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                      : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
-                  }`}>
-                    {isUserCorrect ? '+ ' + q.points + ' điểm' : '0 điểm'}
-                  </span>
-                </div>
-
-                {/* Options Review */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-                  {q.options?.map((opt, oIdx) => {
-                    const isSelectedByStudent = studentSelected.includes(opt.id);
-                    const isOptionCorrect = opt.isCorrect;
-
-                    let optionStyle = 'bg-slate-800/40 border-slate-800 text-slate-400';
-                    if (isOptionCorrect) {
-                      optionStyle = 'bg-emerald-500/10 border-emerald-500/40 text-emerald-300 font-semibold';
-                    } else if (isSelectedByStudent && !isOptionCorrect) {
-                      optionStyle = 'bg-rose-500/10 border-rose-500/40 text-rose-300 font-semibold';
-                    }
-
-                    return (
-                      <div
-                        key={opt.id}
-                        className={`p-3 rounded-xl border flex items-center justify-between text-sm ${optionStyle}`}
-                      >
-                        <div className="flex items-center gap-3">
-                          <span className="w-5 h-5 rounded-full bg-slate-800 text-xs font-bold flex items-center justify-center shrink-0">
-                            {String.fromCharCode(65 + oIdx)}
-                          </span>
-                          <span>{opt.content}</span>
-                        </div>
-                        {isSelectedByStudent && (
-                          <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-slate-800 border border-slate-700">
-                            Bạn chọn
-                          </span>
-                        )}
+              return (
+                <div
+                  key={q.id}
+                  className={`bg-slate-900 border rounded-2xl p-6 space-y-4 ${
+                    isUserCorrect ? 'border-emerald-500/30' : 'border-rose-500/30'
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex items-start gap-3">
+                      <span className={`w-7 h-7 rounded-lg text-xs font-bold flex items-center justify-center shrink-0 mt-0.5 ${
+                        isUserCorrect
+                          ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                          : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+                      }`}>
+                        Q{qIndex + 1}
+                      </span>
+                      <div>
+                        <p className="text-slate-100 font-semibold text-base leading-snug">{q.content}</p>
+                        <span className="text-xs text-slate-400 mt-1 block">({q.points} điểm)</span>
                       </div>
-                    );
-                  })}
-                </div>
+                    </div>
 
-                {q.explanation && (
-                  <div className="text-xs text-slate-300 bg-indigo-950/20 border border-indigo-500/20 p-3.5 rounded-xl space-y-1">
-                    <span className="font-bold text-indigo-400 block">💡 Lời giải chi tiết:</span>
-                    <p>{q.explanation}</p>
+                    <span className={`px-2.5 py-1 rounded-full text-xs font-bold shrink-0 ${
+                      isUserCorrect
+                        ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                        : 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
+                    }`}>
+                      {isUserCorrect ? `+ ${q.points} điểm (Đúng)` : '0 điểm (Sai)'}
+                    </span>
                   </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
+
+                  {/* Options Review */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                    {q.options?.map((opt, oIdx) => {
+                      const isSelectedByStudent = studentSelected.includes(opt.id);
+                      const isOptionCorrect = opt.isCorrect;
+
+                      let optionStyle = 'bg-slate-800/40 border-slate-800 text-slate-400';
+                      let badge = null;
+
+                      if (isSelectedByStudent && isOptionCorrect) {
+                        optionStyle = 'bg-emerald-500/15 border-emerald-500/50 text-emerald-200 font-bold';
+                        badge = <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-emerald-500/30 text-emerald-200 border border-emerald-500/40">✓ Bạn chọn (Đúng)</span>;
+                      } else if (isSelectedByStudent && !isOptionCorrect) {
+                        optionStyle = 'bg-rose-500/15 border-rose-500/50 text-rose-200 font-bold';
+                        badge = <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-rose-500/30 text-rose-200 border border-rose-500/40">✗ Bạn chọn (Sai)</span>;
+                      } else if (!isSelectedByStudent && isOptionCorrect) {
+                        optionStyle = 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300 font-medium';
+                        badge = <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800">Đáp án đúng</span>;
+                      }
+
+                      return (
+                        <div
+                          key={opt.id}
+                          className={`p-3.5 rounded-xl border flex items-center justify-between text-sm transition-all ${optionStyle}`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <span className="w-6 h-6 rounded-full bg-slate-800 text-xs font-bold flex items-center justify-center shrink-0">
+                              {String.fromCharCode(65 + oIdx)}
+                            </span>
+                            <span>{opt.content}</span>
+                          </div>
+                          {badge}
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {q.explanation && (
+                    <div className="text-xs text-slate-300 bg-indigo-950/20 border border-indigo-500/20 p-3.5 rounded-xl space-y-1">
+                      <span className="font-bold text-indigo-400 block">💡 Lời giải chi tiết:</span>
+                      <p>{q.explanation}</p>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );

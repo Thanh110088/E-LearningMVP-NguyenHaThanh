@@ -32,9 +32,9 @@ export const QuestionModal = ({ isOpen, onClose, questionToEdit, subjects, exams
         questionToEdit.options && questionToEdit.options.length > 0
           ? questionToEdit.options.map(o => ({ content: o.content, isCorrect: o.isCorrect }))
           : [
-              { content: '', isCorrect: true },
-              { content: '', isCorrect: false },
-            ]
+            { content: '', isCorrect: true },
+            { content: '', isCorrect: false },
+          ]
       );
     } else {
       setContent('');
@@ -243,11 +243,10 @@ export const QuestionModal = ({ isOpen, onClose, questionToEdit, subjects, exams
                   <button
                     type="button"
                     onClick={() => handleToggleCorrect(idx)}
-                    className={`p-1 rounded-lg transition-colors ${
-                      opt.isCorrect
+                    className={`p-1 rounded-lg transition-colors ${opt.isCorrect
                         ? 'text-emerald-400 bg-emerald-500/10 border border-emerald-500/30'
                         : 'text-slate-500 hover:text-slate-300'
-                    }`}
+                      }`}
                     title={opt.isCorrect ? 'Đáp án Đúng' : 'Đánh dấu là Đúng'}
                   >
                     <CheckCircle2 className="w-5 h-5" />

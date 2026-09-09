@@ -1,25 +1,20 @@
-const request = require('supertest');
-const app = require('../src/app');
 const prisma = require('../src/config/prisma');
+const { registerAndActivate } = require('./helpers/auth');
 
 describe('Workspace Module Integration Tests', () => {
   const teacherUser = {
     email: `teacher_ws_${Date.now()}@elearning.com`,
     password: 'TeacherPassword123',
     fullName: 'Test Teacher Workspace',
+    role: 'TEACHER',
   };
 
-  let token = '';
+  let agent;
 
   beforeAll(async () => {
-    // Register test teacher
-    const regRes = await request(app)
-      .post('/api/v1/auth/register')
-      .send(teacherUser);
+    const result = await registerAndActivate(teacherUser);
+    agent = result.agent;
 
-    token = regRes.body.data.accessToken;
-
-    // Set role to TEACHER
     await prisma.user.update({
       where: { email: teacherUser.email },
       data: { role: 'TEACHER', plan: 'FREE' },
@@ -27,20 +22,20 @@ describe('Workspace Module Integration Tests', () => {
   });
 
   afterAll(async () => {
-    // Clean up created exams, questions, workspaces, and user
     const user = await prisma.user.findUnique({ where: { email: teacherUser.email } });
     if (user) {
+      await prisma.question.deleteMany({ where: { workspace: { userId: user.id } } });
       await prisma.exam.deleteMany({ where: { createdById: user.id } });
       await prisma.workspace.deleteMany({ where: { userId: user.id } });
+      await prisma.refreshToken.deleteMany({ where: { userId: user.id } });
+      await prisma.emailToken.deleteMany({ where: { userId: user.id } });
       await prisma.user.delete({ where: { id: user.id } });
     }
     await prisma.$disconnect();
   });
 
   it('GET /api/v1/workspaces - Auto creates default workspace for teacher', async () => {
-    const res = await request(app)
-      .get('/api/v1/workspaces')
-      .set('Authorization', `Bearer ${token}`);
+    const res = await agent.get('/api/v1/workspaces');
 
     expect(res.statusCode).toBe(200);
     expect(res.body.success).toBe(true);
@@ -50,12 +45,9 @@ describe('Workspace Module Integration Tests', () => {
   });
 
   it('POST /api/v1/workspaces - Rejects 2nd workspace creation on FREE plan', async () => {
-    const res = await request(app)
-      .post('/api/v1/workspaces')
-      .set('Authorization', `Bearer ${token}`)
-      .send({
-        name: 'Workspace Thu 2',
-      });
+    const res = await agent.post('/api/v1/workspaces').send({
+      name: 'Workspace Thu 2',
+    });
 
     expect(res.statusCode).toBe(403);
     expect(res.body.success).toBe(false);
@@ -63,28 +55,22 @@ describe('Workspace Module Integration Tests', () => {
   });
 
   it('POST /api/v1/workspaces - Allows workspace creation up to 5 on PRO plan', async () => {
-    // Upgrade teacher to PRO
     await prisma.user.update({
       where: { email: teacherUser.email },
       data: { plan: 'PRO' },
     });
 
-    const createRes = await request(app)
-      .post('/api/v1/workspaces')
-      .set('Authorization', `Bearer ${token}`)
-      .send({
-        name: 'Workspace Lớp Toán 10',
-        description: 'Chuyên Toán 10',
-        color: '#3b82f6',
-      });
+    const createRes = await agent.post('/api/v1/workspaces').send({
+      name: 'Workspace Lớp Toán 10',
+      description: 'Chuyên Toán 10',
+      color: '#3b82f6',
+    });
 
     expect(createRes.statusCode).toBe(201);
     expect(createRes.body.success).toBe(true);
     expect(createRes.body.data.name).toBe('Workspace Lớp Toán 10');
 
-    const getRes = await request(app)
-      .get('/api/v1/workspaces')
-      .set('Authorization', `Bearer ${token}`);
+    const getRes = await agent.get('/api/v1/workspaces');
 
     expect(getRes.body.data.workspaces.length).toBe(2);
     expect(getRes.body.data.usage.max).toBe(5);
@@ -92,17 +78,13 @@ describe('Workspace Module Integration Tests', () => {
   });
 
   it('POST /api/v1/exams - Creates an exam attached to selected workspace', async () => {
-    const wsRes = await request(app)
-      .get('/api/v1/workspaces')
-      .set('Authorization', `Bearer ${token}`);
-
+    const wsRes = await agent.get('/api/v1/workspaces');
     const activeWs = wsRes.body.data.workspaces[0];
     const subject = await prisma.subject.findFirst();
     const grade = await prisma.grade.findFirst();
 
-    const examRes = await request(app)
+    const examRes = await agent
       .post('/api/v1/exams')
-      .set('Authorization', `Bearer ${token}`)
       .set('X-Workspace-Id', activeWs.id)
       .send({
         title: 'Đề Thi Thử Toán 10 Workspace Test',
@@ -118,15 +100,11 @@ describe('Workspace Module Integration Tests', () => {
   });
 
   it('POST /api/v1/questions - Creates a question attached to selected workspace', async () => {
-    const wsRes = await request(app)
-      .get('/api/v1/workspaces')
-      .set('Authorization', `Bearer ${token}`);
-
+    const wsRes = await agent.get('/api/v1/workspaces');
     const activeWs = wsRes.body.data.workspaces[0];
 
-    const qRes = await request(app)
+    const qRes = await agent
       .post('/api/v1/questions')
-      .set('Authorization', `Bearer ${token}`)
       .set('X-Workspace-Id', activeWs.id)
       .send({
         content: 'Workspace Test Question Content',

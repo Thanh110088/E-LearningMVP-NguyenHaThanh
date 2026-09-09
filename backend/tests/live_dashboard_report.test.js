@@ -1,21 +1,14 @@
-const request = require('supertest');
-const app = require('../src/app');
 const prisma = require('../src/config/prisma');
+const { loginAgent } = require('./helpers/auth');
 
 describe('Sprint 3 & Sprint 4 Integration Tests', () => {
-  let adminToken = '';
+  let agent;
 
   beforeAll(async () => {
-    // Login as Admin
-    const loginRes = await request(app)
-      .post('/api/v1/auth/login')
-      .send({
-        email: 'admin@elearning.com',
-        password: 'Admin123456',
-      });
-
-    if (loginRes.statusCode === 200) {
-      adminToken = loginRes.body.data.accessToken;
+    const login = await loginAgent('admin@elearning.com', 'Admin123456');
+    agent = login.agent;
+    if (login.res.statusCode !== 200) {
+      throw new Error(`Admin login failed: ${login.res.body?.message || login.res.statusCode}`);
     }
   });
 
@@ -24,11 +17,7 @@ describe('Sprint 3 & Sprint 4 Integration Tests', () => {
   });
 
   it('GET /api/v1/dashboard/stats - Lấy số liệu thống kê Dashboard', async () => {
-    if (!adminToken) return;
-
-    const res = await request(app)
-      .get('/api/v1/dashboard/stats')
-      .set('Authorization', `Bearer ${adminToken}`);
+    const res = await agent.get('/api/v1/dashboard/stats');
 
     expect(res.statusCode).toBe(200);
     expect(res.body.success).toBe(true);
@@ -37,9 +26,7 @@ describe('Sprint 3 & Sprint 4 Integration Tests', () => {
   });
 
   it('GET /api/v1/leaderboard - Lấy bảng xếp hạng điểm cao', async () => {
-    const res = await request(app)
-      .get('/api/v1/leaderboard')
-      .set('Authorization', `Bearer ${adminToken}`);
+    const res = await agent.get('/api/v1/leaderboard');
 
     expect(res.statusCode).toBe(200);
     expect(res.body.success).toBe(true);
@@ -47,11 +34,7 @@ describe('Sprint 3 & Sprint 4 Integration Tests', () => {
   });
 
   it('GET /api/v1/reports - Lấy dữ liệu báo cáo các lượt làm bài', async () => {
-    if (!adminToken) return;
-
-    const res = await request(app)
-      .get('/api/v1/reports')
-      .set('Authorization', `Bearer ${adminToken}`);
+    const res = await agent.get('/api/v1/reports');
 
     expect(res.statusCode).toBe(200);
     expect(res.body.success).toBe(true);
@@ -59,22 +42,14 @@ describe('Sprint 3 & Sprint 4 Integration Tests', () => {
   });
 
   it('GET /api/v1/reports/export - Xuất file CSV báo cáo lượt thi', async () => {
-    if (!adminToken) return;
-
-    const res = await request(app)
-      .get('/api/v1/reports/export')
-      .set('Authorization', `Bearer ${adminToken}`);
+    const res = await agent.get('/api/v1/reports/export');
 
     expect(res.statusCode).toBe(200);
     expect(res.header['content-type']).toContain('text/csv');
   });
 
   it('GET /api/v1/audit-logs - Lấy danh sách nhật ký Audit Log (Admin)', async () => {
-    if (!adminToken) return;
-
-    const res = await request(app)
-      .get('/api/v1/audit-logs')
-      .set('Authorization', `Bearer ${adminToken}`);
+    const res = await agent.get('/api/v1/audit-logs');
 
     expect(res.statusCode).toBe(200);
     expect(res.body.success).toBe(true);

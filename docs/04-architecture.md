@@ -5,7 +5,7 @@
 | Tầng hệ thống | Công nghệ / Thư viện |
 | :--- | :--- |
 | **Frontend UI** | React 18, Vite, JavaScript (ES6+), React Router v6, Axios, TanStack Query, Recharts, Lucide React, Tailwind CSS |
-| **Backend REST API** | Node.js, Express.js, Prisma ORM, JWT (jsonwebtoken), bcryptjs, Multer |
+| **Backend REST API** | Node.js, Express.js, Prisma ORM, JWT cookie (httpOnly) + refresh rotation, bcryptjs, Google Auth Library, Nodemailer, Zod, Multer |
 | **Database** | PostgreSQL (Ứng dụng chạy trực tiếp trên máy local, mặc định cổng 5432) |
 | **Testing** | Jest + Supertest (Backend Integration Testing) |
 
@@ -34,7 +34,9 @@ HTTP Request
 ---
 
 ## 3. Cấu trúc bảng Database (Prisma Schema Summary)
-- `users`: Quản lý người dùng, vai trò (ADMIN, TEACHER, STUDENT), gói cước `plan` (`FREE`, `PRO`, `ENTERPRISE`) và thời hạn `planExpiresAt`.
+- `users`: Quản lý người dùng, vai trò, gói cước, `emailVerified`, `googleId`, `provider` (LOCAL/GOOGLE).
+- `refresh_tokens`: Hash refresh token, phục vụ rotation và logout.
+- `email_tokens`: Token xác nhận email / đặt lại mật khẩu (hash SHA-256).
 - `subscriptions`: Quản lý lịch sử đăng ký & giao dịch nâng cấp gói cước (`userId`, `plan`, `amount`, `paymentMethod`, `status`, `expiresAt`).
 - `subjects`: Danh mục môn học.
 - `grades`: Danh mục khối lớp (THPT, THCS, TIỂU HỌC).

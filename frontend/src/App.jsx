@@ -8,6 +8,10 @@ import { ExamDetailPage } from './features/catalog/ExamDetailPage';
 import { PricingPage } from './features/pricing/PricingPage';
 import { LoginPage } from './features/auth/LoginPage';
 import { RegisterPage } from './features/auth/RegisterPage';
+import { VerifyEmailPage } from './features/auth/VerifyEmailPage';
+import { ForgotPasswordPage } from './features/auth/ForgotPasswordPage';
+import { ResetPasswordPage } from './features/auth/ResetPasswordPage';
+import { ProfilePage } from './features/auth/ProfilePage';
 import { CategoryPage } from './features/categories/CategoryPage';
 import { QuestionBankPage } from './features/questions/QuestionBankPage';
 import { ExamManagePage } from './features/exams/ExamManagePage';
@@ -39,25 +43,24 @@ export default function App() {
   }, []);
 
   const checkAuth = async () => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      setLoading(false);
-      return;
-    }
+    // Cookie accessToken (nếu có) được gửi kèm vì withCredentials.
+    // Không cookie / hết hạn → 401 → coi như chưa login.
     try {
       const res = await api.get('/auth/me');
       setUser(res.data);
-    } catch (err) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('refreshToken');
+    } catch {
+      setUser(null);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('refreshToken');
+  const handleLogout = async () => {
+    try {
+      await api.post('/auth/logout');
+    } catch {
+      // cookie đã hết hạn vẫn cho phép thoát phiên local
+    }
     setUser(null);
   };
 
@@ -100,6 +103,10 @@ export default function App() {
             <Route path="/audit-logs" element={user && user.role === 'ADMIN' ? <AuditLogPage user={user} /> : <Navigate to="/" replace />} />
             <Route path="/login" element={user ? <Navigate to="/" replace /> : <LoginPage onLoginSuccess={setUser} />} />
             <Route path="/register" element={user ? <Navigate to="/" replace /> : <RegisterPage onLoginSuccess={setUser} />} />
+            <Route path="/verify-email" element={<VerifyEmailPage onLoginSuccess={setUser} />} />
+            <Route path="/forgot-password" element={user ? <Navigate to="/" replace /> : <ForgotPasswordPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
+            <Route path="/profile" element={user ? <ProfilePage user={user} /> : <Navigate to="/login" replace />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Layout>
