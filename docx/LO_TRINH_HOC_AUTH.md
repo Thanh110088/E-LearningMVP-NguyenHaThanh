@@ -196,3 +196,4 @@ Không cần `/register` trước khi bấm Google. Email LOCAL trùng → hệ 
 | `docs/09-giai-thich-code-auth.md` | Từ điển JWT / cookie / Zod |
 | `docs/08-auth-base.md` | Bảng API |
 | `docs/10-huong-dan-oauth-google.md` | Google Cloud (buổi 5) |
+| `docs/12-luong-auth-theo-giao-dien.md` | Ví dụ từng nút trên giao diện |

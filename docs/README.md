@@ -15,3 +15,4 @@ Mục lục toàn bộ bộ tài liệu thiết kế kiến trúc, lộ trình p
 11. [09. Giải thích luồng code Auth (09-giai-thich-code-auth.md)](./09-giai-thich-code-auth.md) — bản `docx`: [GIAI_THICH_LUONG_CODE_AUTH.md](../docx/GIAI_THICH_LUONG_CODE_AUTH.md)
 12. [10. Hướng dẫn OAuth Google từ A–Z (10-huong-dan-oauth-google.md)](./10-huong-dan-oauth-google.md)
 13. [11. Lộ trình học Auth từng buổi (11-lo-trinh-hoc-auth.md)](./11-lo-trinh-hoc-auth.md) — bản `docx`: [LO_TRINH_HOC_AUTH.md](../docx/LO_TRINH_HOC_AUTH.md)
+14. [12. Luồng Auth theo giao diện (12-luong-auth-theo-giao-dien.md)](./12-luong-auth-theo-giao-dien.md) — bản `docx`: [LUONG_AUTH_THEO_GIAO_DIEN.md](../docx/LUONG_AUTH_THEO_GIAO_DIEN.md)

@@ -225,4 +225,5 @@ Giống auth, chỉ khác nghiệp vụ.
 | `docs/08-auth-base.md` | API, cookie, email, biến môi trường |
 | `docs/10-huong-dan-oauth-google.md` | Google Cloud + `.env` (không giải thích code) |
 | `docs/11-lo-trinh-hoc-auth.md` | Học từng buổi: file nào, vẽ gì, thử gì |
+| `docs/12-luong-auth-theo-giao-dien.md` | Bấm nút nào trên UI thì API/file nào chạy |
 | `docx/HUONG_DAN_OAUTH_GOOGLE.md` | Bản sao hướng dẫn OAuth |

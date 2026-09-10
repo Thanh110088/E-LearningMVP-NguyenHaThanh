@@ -126,4 +126,6 @@ Người mới học luồng code (JWT, cookie, handleAsync, Zod): `docs/09-giai
 
 Học từng buổi (file nào, vẽ gì, thử gì): `docs/11-lo-trinh-hoc-auth.md` (bản `docx/LO_TRINH_HOC_AUTH.md`).
 
+Ví dụ từng nút trên giao diện: `docs/12-luong-auth-theo-giao-dien.md` (bản `docx/LUONG_AUTH_THEO_GIAO_DIEN.md`).
+
 Hướng dẫn cấu hình Google OAuth từng bước: `docs/10-huong-dan-oauth-google.md` (bản `docx/HUONG_DAN_OAUTH_GOOGLE.md`).
