@@ -4,7 +4,7 @@
  */
 const prisma = require('../../config/prisma');
 
-// Không select password khi trả profile ra ngoài
+// Không select password khi trả profile ra ngoài (tránh lộ hash bcrypt)
 const publicUserSelect = {
   id: true,
   email: true,
@@ -21,18 +21,21 @@ const publicUserSelect = {
 };
 
 class AuthRepository {
+  /** Tìm user theo email (kèm password hash — dùng login / quên MK). */
   async findByEmail(email) {
     return prisma.user.findUnique({
       where: { email },
     });
   }
 
+  /** Tìm user đã liên kết Google theo `sub` (googleId). */
   async findByGoogleId(googleId) {
     return prisma.user.findUnique({
       where: { googleId },
     });
   }
 
+  /** Lấy profile theo id, không kèm password. */
   async findById(id) {
     return prisma.user.findUnique({
       where: { id },
@@ -47,6 +50,7 @@ class AuthRepository {
     });
   }
 
+  /** Tạo user mới (LOCAL hoặc GOOGLE). */
   async createUser(userData) {
     return prisma.user.create({
       data: userData,
@@ -63,6 +67,7 @@ class AuthRepository {
     });
   }
 
+  /** Cập nhật user (verify email, đổi MK, gắn googleId...). */
   async updateUser(id, data) {
     return prisma.user.update({
       where: { id },
@@ -71,12 +76,14 @@ class AuthRepository {
     });
   }
 
+  /** Lưu hash token gửi trong email (verify / reset). */
   async createEmailToken({ userId, tokenHash, type, expiresAt }) {
     return prisma.emailToken.create({
       data: { userId, tokenHash, type, expiresAt },
     });
   }
 
+  /** Tìm token email còn chưa dùng (usedAt = null). */
   async findEmailToken(tokenHash, type) {
     return prisma.emailToken.findFirst({
       where: { tokenHash, type, usedAt: null },
@@ -84,6 +91,7 @@ class AuthRepository {
     });
   }
 
+  /** Đánh dấu token đã dùng 1 lần — không click lại được. */
   async markEmailTokenUsed(id) {
     return prisma.emailToken.update({
       where: { id },
@@ -99,12 +107,14 @@ class AuthRepository {
     });
   }
 
+  /** Lưu hash JWT refresh sau login / refresh (phục vụ rotation). */
   async createRefreshToken({ userId, tokenHash, expiresAt, userAgent, ipAddress }) {
     return prisma.refreshToken.create({
       data: { userId, tokenHash, expiresAt, userAgent, ipAddress },
     });
   }
 
+  /** Tìm phiên refresh theo hash, kèm user. */
   async findRefreshToken(tokenHash) {
     return prisma.refreshToken.findUnique({
       where: { tokenHash },
@@ -112,6 +122,7 @@ class AuthRepository {
     });
   }
 
+  /** Thu hồi 1 refresh token (logout hoặc sau khi rotation). */
   async revokeRefreshToken(id) {
     return prisma.refreshToken.update({
       where: { id },

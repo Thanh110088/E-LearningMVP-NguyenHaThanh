@@ -11,6 +11,7 @@ const { readAccessToken } = require('../utils/cookie.util');
 const { handleAsync } = require('../utils/handleAsync');
 const prisma = require('../config/prisma');
 
+/** Đọc JWT access → query user còn active → gắn req.user. */
 const authenticate = handleAsync(async (req, res, next) => {
   const token = readAccessToken(req);
   if (!token) {
@@ -51,6 +52,7 @@ const authenticate = handleAsync(async (req, res, next) => {
   next();
 });
 
+/** Chỉ cho phép các role trong danh sách (phải chạy sau authenticate). */
 const authorize = (...roles) => (req, res, next) => {
   if (!req.user || !roles.includes(req.user.role)) {
     return next(new ForbiddenError('Bạn không có quyền truy cập tài nguyên này'));

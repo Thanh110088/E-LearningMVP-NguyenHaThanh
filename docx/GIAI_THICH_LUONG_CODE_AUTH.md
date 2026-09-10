@@ -1,8 +1,8 @@
-# 09. Giải thích luồng code Auth (dành cho người mới)
+# Giải thích luồng code Auth (dành cho người mới)
 
-Đọc tài liệu này **cùng file trong repo**. File nguồn đã có chú thích tiếng Việt — không copy code vào đây cho dễ đọc.
+Đọc tài liệu này **cùng file trong repo**. File nguồn đã có chú thích tiếng Việt phía trên khối logic — không copy code vào đây cho dễ đọc.
 
-Bản trong `docx`: `docx/GIAI_THICH_LUONG_CODE_AUTH.md`.
+Bản trong `docs`: `docs/09-giai-thich-code-auth.md`.
 
 > Các module khác (exam, question, workspace...) dùng **cùng khuôn**:  
 > `routes` → `controller` → `service` → `repository`.  
@@ -225,4 +225,4 @@ Giống auth, chỉ khác nghiệp vụ.
 | `docs/08-auth-base.md` | API, cookie, email, biến môi trường |
 | `docs/10-huong-dan-oauth-google.md` | Google Cloud + `.env` (không giải thích code) |
 | `docs/11-lo-trinh-hoc-auth.md` | Học từng buổi: file nào, vẽ gì, thử gì |
-| `docx/GIAI_THICH_LUONG_CODE_AUTH.md` | Bản sao tài liệu này trong `docx` |
+| `docx/HUONG_DAN_OAUTH_GOOGLE.md` | Bản sao hướng dẫn OAuth |

@@ -12,12 +12,14 @@ const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const config = require('../config');
 
+/** SHA-256 — lưu hash trên DB thay vì token gốc (email token, refresh). */
 const hashToken = (rawToken) =>
   crypto.createHash('sha256').update(rawToken).digest('hex');
 
 /** Chuỗi ngẫu nhiên hex. 32 bytes → 64 ký tự, đưa vào link email. */
 const generateRawToken = (bytes = 32) => crypto.randomBytes(bytes).toString('hex');
 
+/** Ký JWT access ngắn hạn (id, email, fullName, role). */
 const generateAccessToken = (user) =>
   jwt.sign(
     {
@@ -41,10 +43,13 @@ const generateRefreshToken = (user) =>
     { expiresIn: config.jwtRefreshExpiresIn }
   );
 
+/** Kiểm tra chữ ký + hạn JWT access. Throw nếu sai/hết hạn. */
 const verifyAccessToken = (token) => jwt.verify(token, config.jwtSecret);
 
+/** Kiểm tra chữ ký + hạn JWT refresh. */
 const verifyRefreshToken = (token) => jwt.verify(token, config.jwtRefreshSecret);
 
+/** Mốc thời gian = now + số ms (expiresAt trên DB). */
 const addMs = (ms) => new Date(Date.now() + ms);
 
 module.exports = {

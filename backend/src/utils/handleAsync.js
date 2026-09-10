@@ -12,10 +12,12 @@
  * wrapController: lấy mọi method của class controller rồi bọc handleAsync,
  * nên file controller chỉ việc `async method(req, res) { ... }` là đủ.
  */
+/** Bọc 1 middleware/controller async: throw → next(err) → error handler. */
 const handleAsync = (fn) => (req, res, next) => {
   Promise.resolve(fn(req, res, next)).catch(next);
 };
 
+/** Bọc mọi method của class controller bằng handleAsync (giữ `this`). */
 const wrapController = (controller) => {
   const proto = Object.getPrototypeOf(controller);
   const methodNames = Object.getOwnPropertyNames(proto).filter(

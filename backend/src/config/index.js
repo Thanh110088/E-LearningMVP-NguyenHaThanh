@@ -35,8 +35,10 @@ module.exports = {
     host: process.env.SMTP_HOST || '',
     port: Number(process.env.SMTP_PORT || 587),
     user: process.env.SMTP_USER || '',
-    pass: process.env.SMTP_PASS || '',
-    from: process.env.SMTP_FROM || 'ETech <noreply@elearning.local>',
+    pass: (process.env.SMTP_PASS || '').replace(/\s/g, ''),
+    from:
+      process.env.SMTP_FROM ||
+      (process.env.SMTP_USER ? `ETech <${process.env.SMTP_USER}>` : 'ETech <noreply@elearning.local>'),
   },
   emailTokenTtl: {
     verifyMs: parseDuration(process.env.EMAIL_VERIFY_EXPIRES_IN || '24h', 24 * 60 * 60 * 1000),

@@ -11,6 +11,7 @@ const { ValidationError } = require('../utils/AppError');
  * - fail → ValidationError 400, kèm errors[] từng field
  * - ok → gán req.body = data đã chuẩn hóa (lowercase email, default role...)
  */
+/** Trả middleware: parse Zod trên req.body, fail → 400, ok → ghi đè req.body. */
 const validBodyRequest = (schema) => (req, res, next) => {
   if (!schema) return next();
 

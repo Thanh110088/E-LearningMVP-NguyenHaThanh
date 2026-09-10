@@ -18,6 +18,7 @@ export const GoogleLoginButton = ({ onSuccess, onError }) => {
   useEffect(() => {
     if (!clientId || !btnRef.current) return undefined;
 
+    /** Google trả credential (idToken) → POST /auth/google. */
     const handleCredential = async (response) => {
       try {
         const res = await api.post('/auth/google', { idToken: response.credential });
@@ -27,6 +28,7 @@ export const GoogleLoginButton = ({ onSuccess, onError }) => {
       }
     };
 
+    /** Khởi tạo GIS rồi vẽ nút Google vào btnRef. */
     const renderButton = () => {
       if (!window.google?.accounts?.id || !btnRef.current) return;
       window.google.accounts.id.initialize({

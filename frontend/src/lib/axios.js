@@ -36,6 +36,7 @@ api.interceptors.request.use(
 
 const AUTH_SKIP_REFRESH = /\/auth\/(login|register|google|refresh-token|logout|verify-email|forgot-password|reset-password|resend-verification)/;
 
+/** Đưa lỗi axios thành Error có message/code từ API (UI đọc err.message). */
 const toAppError = (error) => {
   const message = error.response?.data?.message || error.message || 'Có lỗi xảy ra, vui lòng thử lại';
   const customError = new Error(message);

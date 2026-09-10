@@ -122,4 +122,8 @@ Schema là Zod object của **body** (không bọc `{ body: ... }`). Parse thàn
 
 Xem `backend/.env.example` và `frontend/.env.example`.
 
-Người mới học các khái niệm (JWT, cookie, handleAsync, Zod): đọc `docs/09-giai-thich-code-auth.md` rồi mở từng file đã chú thích tiếng Việt.
+Người mới học luồng code (JWT, cookie, handleAsync, Zod): `docs/09-giai-thich-code-auth.md` (bản `docx/GIAI_THICH_LUONG_CODE_AUTH.md`) — chỉ tên file + sơ đồ, mở source trong repo.
+
+Học từng buổi (file nào, vẽ gì, thử gì): `docs/11-lo-trinh-hoc-auth.md` (bản `docx/LO_TRINH_HOC_AUTH.md`).
+
+Hướng dẫn cấu hình Google OAuth từng bước: `docs/10-huong-dan-oauth-google.md` (bản `docx/HUONG_DAN_OAUTH_GOOGLE.md`).

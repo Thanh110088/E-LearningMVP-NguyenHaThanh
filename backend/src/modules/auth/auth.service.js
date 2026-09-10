@@ -8,6 +8,7 @@ const authRepository = require('./auth.repository');
 const mailService = require('../../services/mail.service');
 const { verifyGoogleIdToken } = require('../../services/googleAuth.service');
 const config = require('../../config');
+const logger = require('../../config/logger');
 const {
   generateRawToken,
   hashToken,
@@ -26,6 +27,7 @@ const {
 
 const SALT_ROUNDS = 10; // số vòng bcrypt; càng cao càng chậm brute-force, 10 là mức phổ biến
 
+/** Chỉ trả field an toàn ra JSON — không gồm password hash. */
 const toPublicUser = (user) => ({
   id: user.id,
   email: user.email,
@@ -67,6 +69,9 @@ class AuthService {
 
     if (type === 'VERIFY_EMAIL') {
       const verifyUrl = `${config.frontendUrl}/verify-email?token=${rawToken}`;
+      if (!config.isProduction) {
+        logger.info(`[MAIL:link] verify ${user.email} ${verifyUrl}`);
+      }
       await mailService.sendTemplate('verifyEmail', user.email, {
         fullName: user.fullName,
         verifyUrl,
@@ -75,6 +80,9 @@ class AuthService {
 
     if (type === 'RESET_PASSWORD') {
       const resetUrl = `${config.frontendUrl}/reset-password?token=${rawToken}`;
+      if (!config.isProduction) {
+        logger.info(`[MAIL:link] reset ${user.email} ${resetUrl}`);
+      }
       await mailService.sendTemplate('resetPassword', user.email, {
         fullName: user.fullName,
         resetUrl,
@@ -100,6 +108,7 @@ class AuthService {
     return record.user;
   }
 
+  /** Đăng ký LOCAL: hash MK, emailVerified=false, gửi mail kích hoạt. Không cấp cookie. */
   async register({ email, password, fullName, role }, meta = {}) {
     const existingUser = await authRepository.findByEmail(email.toLowerCase());
     if (existingUser) {
@@ -125,6 +134,7 @@ class AuthService {
     };
   }
 
+  /** Đăng nhập mật khẩu: bcrypt, chặn khóa/chưa verify, cấp cặp JWT. */
   async login({ email, password }, meta = {}) {
     const user = await authRepository.findByEmail(email.toLowerCase());
     if (!user || !user.password) {
@@ -151,6 +161,7 @@ class AuthService {
     return { user: toPublicUser(user), ...tokens };
   }
 
+  /** Đăng nhập Google: verify idToken, tạo user mới hoặc gắn googleId vào email LOCAL. */
   async loginWithGoogle(idToken, meta = {}) {
     const payload = await verifyGoogleIdToken(idToken);
     const email = payload.email.toLowerCase();
@@ -196,6 +207,7 @@ class AuthService {
     return { user: toPublicUser(user), ...tokens };
   }
 
+  /** Kích hoạt tài khoản từ link mail rồi cấp cookie (tự login). */
   async verifyEmail(token, meta = {}) {
     const user = await this.consumeEmailToken(token, 'VERIFY_EMAIL');
     if (!user.isActive) {
@@ -211,6 +223,7 @@ class AuthService {
     return { user: toPublicUser(updated), ...tokens };
   }
 
+  /** Gửi lại mail xác nhận. User đã verify hoặc không tồn tại → vẫn trả sent:true. */
   async resendVerification(email) {
     const user = await authRepository.findByEmail(email.toLowerCase());
     if (!user || user.emailVerified) {
@@ -220,6 +233,7 @@ class AuthService {
     return { sent: true };
   }
 
+  /** Quên MK: chỉ gửi mail nếu user LOCAL còn active + có password. Client luôn thấy thành công. */
   async forgotPassword(email) {
     const user = await authRepository.findByEmail(email.toLowerCase());
     if (user && user.isActive && user.password) {
@@ -228,6 +242,7 @@ class AuthService {
     return { sent: true }; // luôn "thành công" với client
   }
 
+  /** Đặt MK mới từ token mail: hash MK, đá mọi phiên, gửi mail cảnh báo. Không auto-login. */
   async resetPassword({ token, newPassword }, meta = {}) {
     const user = await this.consumeEmailToken(token, 'RESET_PASSWORD');
     if (!user.isActive) {
@@ -247,6 +262,7 @@ class AuthService {
     return { user: toPublicUser(updated) };
   }
 
+  /** Đổi MK khi đã login: kiểm tra MK cũ, revoke refresh, cấp cookie mới, gửi mail. */
   async changePassword(userId, { currentPassword, newPassword }, meta = {}) {
     const user = await authRepository.findByIdWithPassword(userId);
     if (!user) {
@@ -277,6 +293,7 @@ class AuthService {
     return { user: toPublicUser(updated), ...tokens };
   }
 
+  /** Gửi mail "mật khẩu vừa đổi" (IP + thời điểm) — không chứa MK mới. */
   async notifyPasswordChanged(user, meta = {}) {
     const changedAt = new Date().toLocaleString('vi-VN');
     await mailService.sendTemplate('passwordChanged', user.email, {
@@ -286,6 +303,7 @@ class AuthService {
     });
   }
 
+  /** Rotation: verify refresh, revoke token cũ, cấp cặp JWT mới. */
   async refreshToken(rawToken, meta = {}) {
     if (!rawToken) {
       throw new UnauthorizedError('Refresh token không tồn tại');
@@ -316,6 +334,7 @@ class AuthService {
     return { user: toPublicUser(user), ...tokens };
   }
 
+  /** Đăng xuất: thu hồi refresh token hiện tại trên DB (cookie xóa ở controller). */
   async logout(rawRefreshToken) {
     if (rawRefreshToken) {
       const stored = await authRepository.findRefreshToken(hashToken(rawRefreshToken));
@@ -326,6 +345,7 @@ class AuthService {
     return { loggedOut: true };
   }
 
+  /** Trả profile public theo userId (GET /me). */
   async getProfile(userId) {
     const user = await authRepository.findById(userId);
     if (!user) {

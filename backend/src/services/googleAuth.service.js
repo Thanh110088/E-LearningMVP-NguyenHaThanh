@@ -1,3 +1,6 @@
+/**
+ * Verify Google idToken (GIS). Test: token `mock-google:email:name:sub`.
+ */
 const { OAuth2Client } = require('google-auth-library');
 const config = require('../config');
 const { ServiceUnavailableError, UnauthorizedError } = require('../utils/AppError');
@@ -18,6 +21,7 @@ const parseMockToken = (idToken) => {
   };
 };
 
+/** Gọi Google verifyIdToken; trả payload email, name, sub, picture. */
 const verifyGoogleIdToken = async (idToken) => {
   const mock = parseMockToken(idToken);
   if (mock) return mock;

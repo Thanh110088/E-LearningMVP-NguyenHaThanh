@@ -11,6 +11,7 @@ const outbox = []; // hộp thư giả — test gọi findByTo() để lấy tok
 
 let transporter = null;
 
+/** Tạo (hoặc tái sử dụng) kết nối SMTP. Thiếu host/user → null, không gửi thật. */
 const getTransporter = () => {
   if (transporter) return transporter;
   if (!config.smtp.host || !config.smtp.user) return null;
@@ -26,6 +27,7 @@ const getTransporter = () => {
   return transporter;
 };
 
+/** Bọc HTML chung cho mọi mail auth. */
 const wrapLayout = (title, body) => `
   <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;padding:24px;background:#0f172a;color:#e2e8f0;border-radius:16px;">
     <h2 style="color:#22d3ee;margin:0 0 16px;">ETech E-Learning</h2>
@@ -36,6 +38,7 @@ const wrapLayout = (title, body) => `
 `;
 
 const templates = {
+  /** Mail sau đăng ký: link /verify-email?token= */
   verifyEmail({ fullName, verifyUrl }) {
     return {
       subject: 'Xác nhận email đăng ký tài khoản ETech',
@@ -48,6 +51,7 @@ const templates = {
       ),
     };
   },
+  /** Mail quên MK: link /reset-password?token= */
   resetPassword({ fullName, resetUrl }) {
     return {
       subject: 'Đặt lại mật khẩu tài khoản ETech',
@@ -60,6 +64,7 @@ const templates = {
       ),
     };
   },
+  /** Mail cảnh báo sau khi đổi / reset mật khẩu. */
   passwordChanged({ fullName, changedAt, ipAddress }) {
     return {
       subject: 'Mật khẩu tài khoản ETech vừa được thay đổi',
@@ -74,41 +79,53 @@ const templates = {
   },
 };
 
+/** Gửi 1 email. Thiếu SMTP hoặc NODE_ENV=test: chỉ log, không gọi Gmail. */
 const sendMail = async ({ to, subject, html }) => {
   const payload = { to, subject, html, sentAt: new Date().toISOString() };
   outbox.push(payload);
 
   const transport = getTransporter();
   if (!transport || config.isTest) {
-    logger.info(`[MAIL:${config.isTest ? 'test' : 'dev'}] to=${to} subject=${subject}`);
+    logger.info(`[MAIL:${config.isTest ? 'test' : 'dev'}] to=${to} subject=${subject} (chưa gửi SMTP)`);
     return payload;
   }
 
-  await transport.sendMail({
-    from: config.smtp.from,
-    to,
-    subject,
-    html,
-  });
+  try {
+    await transport.sendMail({
+      from: config.smtp.from,
+      to,
+      subject,
+      html,
+    });
+    logger.info(`[MAIL:sent] to=${to} subject=${subject}`);
+  } catch (error) {
+    logger.error(`[MAIL:fail] to=${to} ${error.message}`);
+    if (config.isProduction) throw error;
+  }
   return payload;
 };
 
+/** Chọn template auth (verifyEmail / resetPassword / passwordChanged) rồi gửi. */
 const sendTemplate = async (templateName, to, data) => {
   const built = templates[templateName](data);
   return sendMail({ to, ...built });
 };
 
+/** Test: lấy mail mới nhất gửi tới email này. */
 const findByTo = (email) => [...outbox].reverse().find((item) => item.to === email) || null;
 
+/** Test: lọc thêm theo đoạn subject (phân biệt verify vs reset). */
 const findLatestByToAndSubject = (email, subjectIncludes) =>
   [...outbox]
     .reverse()
     .find((item) => item.to === email && item.subject?.includes(subjectIncludes)) || null;
 
+/** Test: xóa hộp thư giả giữa các test. */
 const clearOutbox = () => {
   outbox.length = 0;
 };
 
+/** Test: snapshot toàn bộ outbox. */
 const getOutbox = () => [...outbox];
 
 module.exports = {

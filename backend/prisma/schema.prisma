@@ -7,98 +7,107 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Vai trò — quyết định quyền API (authorize)
 enum RoleName {
-  ADMIN
-  TEACHER
-  STUDENT
+  ADMIN   // quản trị hệ thống
+  TEACHER // giáo viên: tạo đề, câu hỏi, workspace
+  STUDENT // học sinh: làm bài, xem điểm
 }
 
+// Gói cước hiện tại của user (SaaS)
 enum UserPlan {
-  FREE
-  PRO
-  ENTERPRISE
+  FREE       // miễn phí, giới hạn tính năng
+  PRO        // trả phí cá nhân
+  ENTERPRISE // trả phí tổ chức
 }
 
+// Trạng thái một lần thanh toán / gia hạn gói
 enum SubscriptionStatus {
-  ACTIVE
-  EXPIRED
-  CANCELLED
+  ACTIVE    // đang hiệu lực
+  EXPIRED   // hết hạn
+  CANCELLED // bị hủy
 }
 
+// Kiểu câu hỏi trong ngân hàng / đề thi
 enum QuestionType {
-  SINGLE_CHOICE
-  MULTIPLE_CHOICE
-  TRUE_FALSE
+  SINGLE_CHOICE   // 1 đáp án đúng
+  MULTIPLE_CHOICE // nhiều đáp án đúng
+  TRUE_FALSE      // đúng / sai
 }
 
+// Độ khó câu hỏi (lọc, thống kê)
 enum Difficulty {
-  EASY
-  MEDIUM
-  HARD
+  EASY   // dễ
+  MEDIUM // trung bình
+  HARD   // khó
 }
 
+// Vòng đời đề thi
 enum ExamStatus {
-  DRAFT
-  PUBLISHED
-  ARCHIVED
+  DRAFT     // nháp, học sinh chưa thấy
+  PUBLISHED // đã xuất bản, được làm bài
+  ARCHIVED  // lưu trữ, không mở thi mới
 }
 
+// Trạng thái một lượt làm bài
 enum SubmissionStatus {
-  IN_PROGRESS
-  COMPLETED
-  EXPIRED
+  IN_PROGRESS // đang làm, chưa nộp
+  COMPLETED   // đã nộp
+  EXPIRED     // hết giờ / hết hạn phòng
 }
 
+// Cách tài khoản được tạo / đăng nhập
 enum AuthProvider {
-  LOCAL   // đăng ký bằng email + mật khẩu
-  GOOGLE  // tài khoản tạo từ Google (password có thể null)
+  LOCAL  // đăng ký email + mật khẩu
+  GOOGLE // tạo từ Google (password có thể null)
 }
 
+// Loại token gửi trong email (DB chỉ lưu hash)
 enum EmailTokenType {
-  VERIFY_EMAIL     // link kích hoạt tài khoản sau đăng ký
-  RESET_PASSWORD   // link quên mật khẩu
+  VERIFY_EMAIL   // kích hoạt tài khoản sau đăng ký
+  RESET_PASSWORD // quên mật khẩu
 }
 
+// Tài khoản người dùng
 model User {
-  id                String         @id @default(uuid())
-  email             String         @unique
-  password          String?        // null nếu chỉ login Google, chưa đặt mật khẩu
-  fullName          String
-  avatarUrl         String?
-  googleId          String?        @unique // "sub" Google trả về, dùng để nhận diện lần sau
-  provider          AuthProvider   @default(LOCAL)
-  emailVerified     Boolean        @default(false) // false → chưa được login password
-  emailVerifiedAt   DateTime?
-  passwordChangedAt DateTime?
-  role              RoleName       @default(STUDENT)
-  plan              UserPlan       @default(FREE)
-  planExpiresAt     DateTime?
-  isActive          Boolean        @default(true)
-  createdAt         DateTime       @default(now())
-  updatedAt         DateTime       @updatedAt
+  id                String         @id @default(uuid()) // khóa chính UUID
+  email             String         @unique             // email đăng nhập, unique, lưu lowercase
+  password          String?                            // hash bcrypt; null nếu chỉ login Google
+  fullName          String                             // tên hiển thị
+  avatarUrl         String?                            // ảnh đại diện (Google hoặc tự cập nhật)
+  googleId          String?        @unique             // "sub" Google, nhận diện lần sau
+  provider          AuthProvider   @default(LOCAL)     // LOCAL hoặc GOOGLE
+  emailVerified     Boolean        @default(false)     // false → chưa login được bằng mật khẩu
+  emailVerifiedAt   DateTime?                          // lúc xác nhận email (Google gắn luôn)
+  passwordChangedAt DateTime?                          // lần đổi MK gần nhất
+  role              RoleName       @default(STUDENT)   // ADMIN / TEACHER / STUDENT
+  plan              UserPlan       @default(FREE)      // gói cước hiện hành
+  planExpiresAt     DateTime?                          // hết hạn gói (null = chưa set / FREE)
+  isActive          Boolean        @default(true)      // false = bị khóa, không login
+  createdAt         DateTime       @default(now())     // ngày tạo
+  updatedAt         DateTime       @updatedAt          // Prisma tự cập nhật
 
-  createdExams  Exam[]         @relation("CreatedExams")
-  submissions   Submission[]
-  auditLogs     AuditLog[]
-  subscriptions Subscription[]
-  workspaces    Workspace[]
-  refreshTokens RefreshToken[]
-  emailTokens   EmailToken[]
+  createdExams  Exam[]         @relation("CreatedExams") // đề thi giáo viên này tạo
+  submissions   Submission[]                             // lượt làm bài
+  auditLogs     AuditLog[]                               // nhật ký hành động
+  subscriptions Subscription[]                           // lịch sử gói cước
+  workspaces    Workspace[]                              // thư mục giáo viên
+  refreshTokens RefreshToken[]                           // phiên JWT refresh (hash)
+  emailTokens   EmailToken[]                             // token verify mail / reset MK
 
   @@map("users")
 }
 
-// Mỗi lần login/refresh tạo 1 hàng. Logout / đổi MK đánh dấu revokedAt.
-// Chỉ lưu tokenHash, không lưu JWT gốc.
+// Mỗi login/refresh = 1 hàng. Logout / đổi MK gắn revokedAt. Chỉ lưu hash, không lưu JWT gốc.
 model RefreshToken {
-  id        String    @id @default(uuid())
-  userId    String
-  tokenHash String    @unique
-  expiresAt DateTime
-  revokedAt DateTime? // null = còn dùng được
-  userAgent String?
-  ipAddress String?
-  createdAt DateTime  @default(now())
+  id        String    @id @default(uuid()) // khóa chính UUID
+  userId    String                         // user sở hữu phiên
+  tokenHash String    @unique              // SHA-256 của JWT refresh (+ jti)
+  expiresAt DateTime                       // hết hạn cookie / JWT refresh
+  revokedAt DateTime?                      // null = còn dùng; có giá trị = đã thu hồi
+  userAgent String?                        // trình duyệt lúc cấp token
+  ipAddress String?                        // IP lúc cấp token
+  createdAt DateTime  @default(now())      // lúc tạo phiên
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -106,15 +115,15 @@ model RefreshToken {
   @@map("refresh_tokens")
 }
 
-// Token trong email: user nhận raw token, DB chỉ có hash.
+// Token trong email: user nhận raw trên link, DB chỉ có hash. Dùng 1 lần.
 model EmailToken {
-  id        String         @id @default(uuid())
-  userId    String
-  tokenHash String         @unique
-  type      EmailTokenType
-  expiresAt DateTime
-  usedAt    DateTime?      // khác null = đã dùng 1 lần, không dùng lại
-  createdAt DateTime       @default(now())
+  id        String         @id @default(uuid()) // khóa chính UUID
+  userId    String                              // user nhận mail
+  tokenHash String         @unique              // SHA-256 token trong link
+  type      EmailTokenType                      // VERIFY_EMAIL hoặc RESET_PASSWORD
+  expiresAt DateTime                            // TTL: verify ~24h, reset ~15m
+  usedAt    DateTime?                           // khác null = đã dùng, không dùng lại
+  createdAt DateTime       @default(now())      // lúc tạo / gửi mail
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -122,170 +131,178 @@ model EmailToken {
   @@map("email_tokens")
 }
 
+// Thư mục giáo viên: gom đề thi + câu hỏi
 model Workspace {
-  id          String   @id @default(uuid())
-  name        String
-  description String?
-  color       String?  @default("#06b6d4")
-  icon        String?  @default("FolderKanban")
-  isDefault   Boolean  @default(false)
-  userId      String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id          String   @id @default(uuid())      // khóa chính UUID
+  name        String                             // tên thư mục
+  description String?                            // mô tả tuỳ chọn
+  color       String?  @default("#06b6d4")       // màu UI (hex)
+  icon        String?  @default("FolderKanban")  // tên icon Lucide
+  isDefault   Boolean  @default(false)           // workspace mặc định khi GV mới
+  userId      String                             // chủ workspace
+  createdAt   DateTime @default(now())           // ngày tạo
+  updatedAt   DateTime @updatedAt                // Prisma tự cập nhật
 
-  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  exams       Exam[]
-  questions   Question[]
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exams     Exam[]     // đề trong thư mục
+  questions Question[] // câu hỏi ngân hàng trong thư mục
 
   @@map("workspaces")
 }
 
+// Môn học (Toán, Lý...) — gắn vào đề thi
 model Subject {
-  id          String   @id @default(uuid())
-  name        String   @unique
-  code        String   @unique
-  description String?
-  icon        String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id          String   @id @default(uuid()) // khóa chính UUID
+  name        String   @unique              // tên môn, unique
+  code        String   @unique              // mã ngắn (VD: TOAN), unique
+  description String?                       // mô tả
+  icon        String?                       // icon UI
+  createdAt   DateTime @default(now())      // ngày tạo
+  updatedAt   DateTime @updatedAt           // Prisma tự cập nhật
 
-  exams       Exam[]
+  exams Exam[] // đề thuộc môn này
 
   @@map("subjects")
 }
 
+// Khối / lớp (lớp 10, 11...) — gắn vào đề thi
 model Grade {
-  id          String   @id @default(uuid())
-  name        String   @unique
-  code        String   @unique
-  description String?
-  level       Int      @default(1)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id          String   @id @default(uuid()) // khóa chính UUID
+  name        String   @unique              // tên hiển thị (VD: Lớp 10)
+  code        String   @unique              // mã ngắn, unique
+  description String?                       // mô tả
+  level       Int      @default(1)          // thứ tự sắp xếp (1, 2, 3...)
+  createdAt   DateTime @default(now())      // ngày tạo
+  updatedAt   DateTime @updatedAt           // Prisma tự cập nhật
 
-  exams       Exam[]
+  exams Exam[] // đề thuộc khối này
 
   @@map("grades")
 }
 
+// Đề thi / quiz — đề thường hoặc phòng live có kiểm soát
 model Exam {
-  id               String       @id @default(uuid())
-  title            String
-  description      String?
-  code             String       @unique
-  thumbnailUrl     String?
-  durationMinutes  Int          @default(45)
-  totalPoints      Float        @default(10.0)
-  passPoints       Float        @default(5.0)
-  status           ExamStatus   @default(DRAFT)
-  isLive           Boolean      @default(false)
-  pinCode          String?
+  id              String     @id @default(uuid())   // khóa chính UUID
+  title           String                            // tiêu đề đề thi
+  description     String?                           // mô tả / hướng dẫn làm bài
+  code            String     @unique                // mã đề công khai, unique
+  thumbnailUrl    String?                           // ảnh bìa
+  durationMinutes Int        @default(45)           // thời gian làm bài (phút)
+  totalPoints     Float      @default(10.0)         // tổng điểm đề (thang 10)
+  passPoints      Float      @default(5.0)          // điểm đạt
+  status          ExamStatus @default(DRAFT)        // DRAFT / PUBLISHED / ARCHIVED
+  isLive          Boolean    @default(false)        // true = phòng live, không phải tự luyện
+  pinCode         String?                           // PIN vào phòng live (null = đề thường)
 
-  // === PHÒNG THI CÓ KIỂM SOÁT ===
-  startTime        DateTime?    // Thời điểm mở phòng thi
-  endTime          DateTime?    // Thời điểm đóng phòng thi
-  examPassword     String?      // Mật khẩu vào phòng thi (null = không yêu cầu)
-  shuffleQuestions Boolean      @default(false) // Trộn thứ tự câu hỏi
-  shuffleOptions   Boolean      @default(false) // Trộn thứ tự đáp án
-  maxAttempts      Int          @default(1)     // Số lần thi tối đa (0 = không giới hạn)
-  showAnswerAfter  Boolean      @default(false) // Cho xem đáp án sau khi nộp bài
-  proctorEnabled   Boolean      @default(false) // Bật chế độ giám sát (fullscreen enforcement)
+  startTime        DateTime?              // mở phòng (null = không giới hạn giờ mở)
+  endTime          DateTime?              // đóng phòng / hết hạn nộp
+  examPassword     String?                // mật khẩu vào phòng (null = không yêu cầu)
+  shuffleQuestions Boolean @default(false) // trộn thứ tự câu hỏi từng học sinh
+  shuffleOptions   Boolean @default(false) // trộn thứ tự đáp án trong câu
+  maxAttempts      Int     @default(1)     // số lần thi tối đa (0 = không giới hạn)
+  showAnswerAfter  Boolean @default(false) // cho xem đáp án sau khi nộp
+  proctorEnabled   Boolean @default(false) // giám sát fullscreen, ghi vi phạm
 
-  subjectId        String
-  gradeId          String
-  createdById      String
-  workspaceId      String?
-  createdAt        DateTime     @default(now())
-  updatedAt        DateTime     @updatedAt
+  subjectId   String                       // FK môn học
+  gradeId     String                       // FK khối lớp
+  createdById String                       // giáo viên / admin tạo đề
+  workspaceId String?                      // thư mục chứa đề (null = không gắn)
+  createdAt   DateTime @default(now())     // ngày tạo
+  updatedAt   DateTime @updatedAt          // Prisma tự cập nhật
 
-  subject          Subject      @relation(fields: [subjectId], references: [id])
-  grade            Grade        @relation(fields: [gradeId], references: [id])
-  createdBy        User         @relation("CreatedExams", fields: [createdById], references: [id])
-  workspace        Workspace?   @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
-  questions        Question[]
-  submissions      Submission[]
+  subject     Subject      @relation(fields: [subjectId], references: [id])
+  grade       Grade        @relation(fields: [gradeId], references: [id])
+  createdBy   User         @relation("CreatedExams", fields: [createdById], references: [id])
+  workspace   Workspace?   @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
+  questions   Question[]   // câu hỏi trong đề
+  submissions Submission[] // lượt làm bài
 
   @@map("exams")
 }
 
+// Câu hỏi — thuộc một đề (examId) hoặc ngân hàng trong workspace
 model Question {
-  id          String       @id @default(uuid())
-  content     String
-  type        QuestionType @default(SINGLE_CHOICE)
-  points      Float        @default(1.0)
-  difficulty  Difficulty   @default(MEDIUM)
-  explanation String?
-  imageUrl    String?
-  examId      String?
-  subjectId   String?
-  workspaceId String?
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  id          String       @id @default(uuid())          // khóa chính UUID
+  content     String                                     // nội dung câu (text / markdown)
+  type        QuestionType @default(SINGLE_CHOICE)       // 1 đáp án / nhiều đáp án / đúng-sai
+  points      Float        @default(1.0)                 // điểm câu này
+  difficulty  Difficulty   @default(MEDIUM)              // EASY / MEDIUM / HARD
+  explanation String?                                    // giải thích đáp án (sau khi nộp)
+  imageUrl    String?                                    // ảnh minh họa
+  examId      String?                                    // đề chứa câu (null = ngân hàng)
+  subjectId   String?                                    // môn, lọc ngân hàng
+  workspaceId String?                                    // workspace chứa câu ngân hàng
+  createdAt   DateTime     @default(now())               // ngày tạo
+  updatedAt   DateTime     @updatedAt                    // Prisma tự cập nhật
 
-  exam        Exam?        @relation(fields: [examId], references: [id], onDelete: Cascade)
-  workspace   Workspace?   @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
-  options     Option[]
+  exam      Exam?      @relation(fields: [examId], references: [id], onDelete: Cascade)
+  workspace Workspace? @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
+  options   Option[]   // các lựa chọn A, B, C...
 
   @@map("questions")
 }
 
+// Một lựa chọn (A, B, C...) của câu hỏi
 model Option {
-  id         String   @id @default(uuid())
-  content    String
-  isCorrect  Boolean  @default(false)
-  questionId String
+  id         String  @id @default(uuid()) // khóa chính UUID
+  content    String                       // nội dung đáp án
+  isCorrect  Boolean @default(false)      // true = đáp án đúng (nhiều lựa chọn có thể nhiều true)
+  questionId String                       // câu hỏi cha
 
-  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
 
   @@map("options")
 }
 
+// Một lượt học sinh làm một đề
 model Submission {
-  id          String           @id @default(uuid())
-  examId      String
-  userId      String
-  score          Float            @default(0.0)
-  isPassed       Boolean          @default(false)
-  status         SubmissionStatus @default(IN_PROGRESS)
-  startedAt      DateTime         @default(now())
-  submittedAt    DateTime?
-  answersJson    Json?
-  violations     Json?            // Mảng {type, timestamp} ghi lại vi phạm chi tiết
-  questionOrder  Json?            // Thứ tự câu hỏi sau khi trộn đề (array of questionId)
+  id            String           @id @default(uuid())        // khóa chính UUID
+  examId        String                                       // đề đang làm
+  userId        String                                       // học sinh làm bài
+  score         Float            @default(0.0)               // tổng điểm đạt được
+  isPassed      Boolean          @default(false)             // true nếu score >= passPoints
+  status        SubmissionStatus @default(IN_PROGRESS)       // IN_PROGRESS / COMPLETED / EXPIRED
+  startedAt     DateTime         @default(now())             // bắt đầu làm
+  submittedAt   DateTime?                                    // nộp bài (null = chưa nộp)
+  answersJson   Json?                                        // đáp án chọn (questionId → option)
+  violations    Json?                                        // [{type, timestamp}] vi phạm giám sát
+  questionOrder Json?                                        // thứ tự questionId sau khi trộn đề
 
-  exam        Exam             @relation(fields: [examId], references: [id])
-  user        User             @relation(fields: [userId], references: [id])
+  exam Exam @relation(fields: [examId], references: [id])
+  user User @relation(fields: [userId], references: [id])
 
   @@map("submissions")
 }
 
+// Lịch sử mua / gia hạn gói cước
 model Subscription {
-  id            String             @id @default(uuid())
-  userId        String
-  plan          UserPlan
-  amount        Float              @default(0.0)
-  paymentMethod String             @default("QR_BANKING")
-  status        SubscriptionStatus @default(ACTIVE)
-  startedAt     DateTime           @default(now())
-  expiresAt     DateTime?
-  createdAt     DateTime           @default(now())
+  id            String             @id @default(uuid())    // khóa chính UUID
+  userId        String                                     // user mua gói
+  plan          UserPlan                                   // gói lần này (PRO / ENTERPRISE...)
+  amount        Float              @default(0.0)           // số tiền
+  paymentMethod String             @default("QR_BANKING")  // cách thanh toán
+  status        SubscriptionStatus @default(ACTIVE)        // ACTIVE / EXPIRED / CANCELLED
+  startedAt     DateTime           @default(now())         // bắt đầu hiệu lực
+  expiresAt     DateTime?                                  // hết hạn lần này
+  createdAt     DateTime           @default(now())         // ngày tạo bản ghi
 
-  user          User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("subscriptions")
 }
 
+// Nhật ký hành động (login, tạo đề...) — admin / bảo mật
 model AuditLog {
-  id        String   @id @default(uuid())
-  userId    String?
-  action    String
-  resource  String
-  details   String?
-  ipAddress String?
-  userAgent String?
-  createdAt DateTime @default(now())
+  id        String   @id @default(uuid()) // khóa chính UUID
+  userId    String?                       // user thực hiện (null nếu chưa xác định)
+  action    String                        // mã hành động, VD USER_LOGIN
+  resource  String                        // loại tài nguyên, VD User, Exam
+  details   String?                       // chi tiết thêm (JSON/text)
+  ipAddress String?                       // IP request
+  userAgent String?                       // User-Agent trình duyệt
+  createdAt DateTime @default(now())      // lúc ghi log
 
-  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@map("audit_logs")
 }

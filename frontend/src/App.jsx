@@ -42,6 +42,7 @@ export default function App() {
     checkAuth();
   }, []);
 
+  /** GET /auth/me — có cookie hợp lệ thì khôi phục user khi F5. */
   const checkAuth = async () => {
     // Cookie accessToken (nếu có) được gửi kèm vì withCredentials.
     // Không cookie / hết hạn → 401 → coi như chưa login.
@@ -55,6 +56,7 @@ export default function App() {
     }
   };
 
+  /** POST /auth/logout rồi xóa user trên UI. */
   const handleLogout = async () => {
     try {
       await api.post('/auth/logout');

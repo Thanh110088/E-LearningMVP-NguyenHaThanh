@@ -16,6 +16,7 @@ export const ResetPasswordPage = () => {
   const [error, setError] = useState('');
   const [done, setDone] = useState(false);
 
+  /** POST /auth/reset-password với token trên URL + mật khẩu mới. */
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (newPassword !== confirmPassword) {

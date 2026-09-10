@@ -13,6 +13,7 @@ export const ProfilePage = ({ user }) => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
+  /** POST /auth/change-password khi đã có cookie phiên. */
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (newPassword !== confirmPassword) {

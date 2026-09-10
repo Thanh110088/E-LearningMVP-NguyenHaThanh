@@ -18,6 +18,7 @@ export const VerifyEmailPage = ({ onLoginSuccess }) => {
     if (!token) return undefined;
     let cancelled = false;
 
+    /** POST /auth/verify-email với token trên URL, rồi vào trang chủ. */
     const run = async () => {
       try {
         const res = await api.post('/auth/verify-email', { token });

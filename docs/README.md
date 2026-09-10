@@ -12,4 +12,6 @@ Mục lục toàn bộ bộ tài liệu thiết kế kiến trúc, lộ trình p
 8. [Tiến Độ Chi Tiết Các Module (modules/STATUS.md)](./modules/STATUS.md)
 9. [08. Auth Base Cookie / Google / Email (08-auth-base.md)](./08-auth-base.md)
 10. [Báo cáo nâng cấp Auth-Base (BAO_CAO_AUTH_BASE.md)](./BAO_CAO_AUTH_BASE.md)
-11. [09. Giải thích code Auth cho người mới (09-giai-thich-code-auth.md)](./09-giai-thich-code-auth.md)
+11. [09. Giải thích luồng code Auth (09-giai-thich-code-auth.md)](./09-giai-thich-code-auth.md) — bản `docx`: [GIAI_THICH_LUONG_CODE_AUTH.md](../docx/GIAI_THICH_LUONG_CODE_AUTH.md)
+12. [10. Hướng dẫn OAuth Google từ A–Z (10-huong-dan-oauth-google.md)](./10-huong-dan-oauth-google.md)
+13. [11. Lộ trình học Auth từng buổi (11-lo-trinh-hoc-auth.md)](./11-lo-trinh-hoc-auth.md) — bản `docx`: [LO_TRINH_HOC_AUTH.md](../docx/LO_TRINH_HOC_AUTH.md)

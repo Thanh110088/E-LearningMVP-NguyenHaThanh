@@ -12,6 +12,7 @@ export const ForgotPasswordPage = () => {
   const [error, setError] = useState('');
   const [done, setDone] = useState(false);
 
+  /** POST /auth/forgot-password — luôn hiện thành công, không lộ email có tồn tại. */
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);

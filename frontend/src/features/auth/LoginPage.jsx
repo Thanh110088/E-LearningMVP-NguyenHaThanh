@@ -18,11 +18,13 @@ export const LoginPage = ({ onLoginSuccess }) => {
   const [error, setError] = useState('');
   const [info, setInfo] = useState('');
 
+  /** Cookie đã set → lưu user vào App rồi về trang chủ. */
   const handleSuccess = (user) => {
     onLoginSuccess(user);
     navigate('/');
   };
 
+  /** Gửi email + mật khẩu lên POST /auth/login. */
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -44,6 +46,7 @@ export const LoginPage = ({ onLoginSuccess }) => {
     }
   };
 
+  /** Gửi lại mail xác nhận khi API trả EMAIL_NOT_VERIFIED. */
   const handleResend = async () => {
     try {
       await api.post('/auth/resend-verification', { email });

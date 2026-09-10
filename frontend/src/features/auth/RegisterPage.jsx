@@ -19,6 +19,7 @@ export const RegisterPage = ({ onLoginSuccess }) => {
   const [error, setError] = useState('');
   const [registered, setRegistered] = useState(false);
 
+  /** POST /auth/register — không login ngay, hiện màn "kiểm tra email". */
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
